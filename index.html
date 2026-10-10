@@ -1,995 +1,734 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Food Wheel – วงล้อสุ่มเมนูอาหาร</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Food Wheel · วงล้อสุ่มเมนูอาหาร</title>
+<meta name="description" content="กินอะไรดี? หมุนวงล้อสุ่มเมนูอาหารไทย จีน ญี่ปุ่น ยุโรป อีสาน ตามงบประมาณและเงื่อนไขของคุณ" />
+<meta name="theme-color" content="#f97316" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍜</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 <script src="https://cdn.tailwindcss.com"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script>
-  tailwind.config = { theme: { extend: { fontFamily: { sans: ['Kanit', 'system-ui', 'sans-serif'] } } } };
+  tailwind.config = { theme: { extend: { fontFamily: { sans: ['Prompt', 'system-ui', 'sans-serif'] } } } };
 </script>
 <style>
-  html, body { min-height: 100%; }
+  html { -webkit-tap-highlight-color: transparent; }
   body {
-    font-family: 'Kanit', system-ui, sans-serif;
-    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 40%, #fed7aa 100%);
-    color: #431407;
-    -webkit-tap-highlight-color: transparent;
+    font-family: 'Prompt', system-ui, sans-serif;
+    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 35%, #fed7aa 70%, #fdba74 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
   }
-  .blob { position: fixed; border-radius: 9999px; filter: blur(70px); opacity: .55; z-index: 0; pointer-events: none; animation: float 12s ease-in-out infinite; }
-  @keyframes float { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-30px) scale(1.08); } }
+  .glass {
+    background: rgba(255, 255, 255, 0.68);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 10px 40px -12px rgba(194, 65, 12, 0.25);
+  }
+  .float-emoji { position: fixed; z-index: 0; opacity: .18; pointer-events: none; user-select: none; animation: floaty 9s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-22px) rotate(8deg); } }
 
-  .glass { background: rgba(255,255,255,.62); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-           border: 1px solid rgba(255,255,255,.75); box-shadow: 0 10px 40px rgba(194,65,12,.15); }
-
-  .step { display: none; }
-  .step.active { display: block; animation: fadeUp .5s ease both; }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
-
-  .cat-card { transition: transform .2s, box-shadow .2s, border-color .2s; border: 2px solid transparent; cursor: pointer; }
-  .cat-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 14px 30px rgba(234,88,12,.28); }
+  .cat-card { transition: transform .2s ease, box-shadow .2s ease; }
+  .cat-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 18px 30px -12px rgba(194,65,12,.45); }
   .cat-card:active { transform: scale(.97); }
-  .cat-card.selected { border-color: #ea580c; background: rgba(255,237,213,.9); }
 
-  .chip { transition: all .15s; cursor: pointer; user-select: none; }
-  .chip:active { transform: scale(.95); }
-  .chip.on { background: #ea580c; color: #fff; border-color: #ea580c; }
+  .fade-in { animation: fadeIn .45s ease both; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
-  .btn-primary { background: linear-gradient(135deg, #f97316, #dc2626); color: #fff; font-weight: 600;
-                 box-shadow: 0 8px 22px rgba(220,38,38,.35); transition: transform .15s, box-shadow .15s, filter .15s; }
-  .btn-primary:hover { transform: translateY(-2px); filter: brightness(1.06); }
-  .btn-primary:active { transform: scale(.97); }
-  .btn-primary:disabled { filter: grayscale(.6) brightness(.95); cursor: not-allowed; transform: none; box-shadow: none; }
-  .btn-ghost { background: rgba(255,255,255,.75); border: 1px solid rgba(251,146,60,.5); color: #9a3412; font-weight: 500; transition: all .15s; }
-  .btn-ghost:hover { background: #fff; transform: translateY(-1px); }
-  .btn-ghost:active { transform: scale(.97); }
+  .chip { transition: all .15s ease; }
+  .chip.active { background: linear-gradient(135deg,#f97316,#ef4444); color: #fff; border-color: transparent; box-shadow: 0 6px 14px -4px rgba(239,68,68,.55); }
 
-  #wheelWrap { position: relative; margin: 0 auto; }
-  #wheelCanvas { width: 100%; height: 100%; display: block; border-radius: 9999px; }
-  #pointer { position: absolute; top: -3.5%; left: 50%; width: 11%; transform: translateX(-50%); transform-origin: 50% 18%; z-index: 5;
-             filter: drop-shadow(0 4px 4px rgba(0,0,0,.35)); pointer-events: none; }
-  #spinCenter { position: absolute; top: 50%; left: 50%; width: 21%; aspect-ratio: 1; transform: translate(-50%,-50%); z-index: 6;
-                border-radius: 9999px; border: 4px solid #fff; color: #fff; font-weight: 700; letter-spacing: .04em;
-                background: radial-gradient(circle at 30% 25%, #fb923c, #dc2626 70%);
-                box-shadow: 0 6px 18px rgba(0,0,0,.35), inset 0 -4px 8px rgba(0,0,0,.2);
-                transition: transform .15s; font-size: clamp(11px, 3.2vw, 18px); }
-  #spinCenter:not(:disabled) { animation: pulse 1.8s ease-in-out infinite; }
-  #spinCenter:active:not(:disabled) { transform: translate(-50%,-50%) scale(.93); }
-  #spinCenter:disabled { filter: grayscale(.4) brightness(.9); cursor: not-allowed; }
-  @keyframes pulse { 0%,100% { box-shadow: 0 6px 18px rgba(0,0,0,.35), 0 0 0 0 rgba(249,115,22,.55); }
-                     50% { box-shadow: 0 6px 18px rgba(0,0,0,.35), 0 0 0 14px rgba(249,115,22,0); } }
+  .spin-btn { background: linear-gradient(135deg,#fb923c,#dc2626); box-shadow: 0 10px 25px -6px rgba(220,38,38,.6), inset 0 2px 0 rgba(255,255,255,.35); transition: transform .15s ease, filter .15s ease; }
+  .spin-btn:hover:not(:disabled) { transform: scale(1.04); filter: brightness(1.05); }
+  .spin-btn:active:not(:disabled) { transform: scale(.96); }
+  .spin-btn:disabled { filter: grayscale(.4) brightness(.9); cursor: not-allowed; }
 
-  .spinner { width: 64px; height: 64px; border-radius: 9999px; border: 6px solid #fed7aa; border-top-color: #ea580c; animation: rot 0.9s linear infinite; }
+  #pointer { transform-origin: 50% 22%; filter: drop-shadow(0 4px 4px rgba(0,0,0,.35)); }
+
+  .list-item { transition: all .25s ease; }
+  .list-item.winner { background: linear-gradient(135deg,#fef3c7,#fed7aa); border-color: #f97316; transform: scale(1.02); box-shadow: 0 8px 20px -8px rgba(249,115,22,.6); }
+
+  /* Modal */
+  #modal { transition: opacity .25s ease; }
+  #modal.hidden-modal { opacity: 0; pointer-events: none; }
+  #modal .card { transition: transform .35s cubic-bezier(.2,1.4,.4,1); transform: scale(.7) translateY(30px); }
+  #modal:not(.hidden-modal) .card { transform: none; }
+
+  .confetti { position: fixed; top: -20px; width: 10px; height: 16px; z-index: 70; pointer-events: none; animation: fall linear forwards; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: .9; } }
+
+  .loader { width: 54px; height: 54px; border-radius: 50%; border: 6px solid #fed7aa; border-top-color: #ea580c; animation: rot .8s linear infinite; }
   @keyframes rot { to { transform: rotate(360deg); } }
-  .bounce { animation: bounce 1s ease infinite; display: inline-block; }
-  @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-  .pop { animation: popIn .45s cubic-bezier(.2,1.4,.4,1) both; }
-  @keyframes popIn { from { opacity: 0; transform: scale(.7) translateY(20px); } to { opacity: 1; transform: none; } }
 
-  .dot { transition: all .3s; }
-  .dot.active { background: #ea580c; color: #fff; transform: scale(1.12); box-shadow: 0 4px 12px rgba(234,88,12,.5); }
-  .dot.done { background: #fdba74; color: #7c2d12; }
-  input:focus, details summary:focus { outline: none; }
-  .field:focus { box-shadow: 0 0 0 3px rgba(249,115,22,.35); border-color: #f97316; }
+  .pop { animation: pop .5s cubic-bezier(.2,1.4,.4,1) both; }
+  @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: none; opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .float-emoji, .fade-in { animation: none; } }
 </style>
 </head>
-<body class="relative overflow-x-hidden">
 
-<div class="blob" style="width:340px;height:340px;background:#fdba74;top:-80px;left:-100px"></div>
-<div class="blob" style="width:300px;height:300px;background:#fca5a5;bottom:-60px;right:-90px;animation-delay:-4s"></div>
-<div class="blob" style="width:240px;height:240px;background:#fde68a;top:45%;left:60%;animation-delay:-8s"></div>
+<body class="text-stone-800 antialiased">
+  <!-- Floating background emojis -->
+  <div aria-hidden="true">
+    <span class="float-emoji text-6xl" style="top:8%;left:5%;animation-delay:0s">🍜</span>
+    <span class="float-emoji text-5xl" style="top:20%;right:6%;animation-delay:1.5s">🍣</span>
+    <span class="float-emoji text-6xl" style="bottom:18%;left:8%;animation-delay:3s">🍕</span>
+    <span class="float-emoji text-5xl" style="bottom:10%;right:10%;animation-delay:4.5s">🥘</span>
+    <span class="float-emoji text-4xl" style="top:55%;left:48%;animation-delay:2s">🌶️</span>
+  </div>
 
-<canvas id="confetti" class="fixed inset-0 z-[60] pointer-events-none"></canvas>
+  <div class="relative z-10 max-w-5xl mx-auto px-4 pb-16">
+    <!-- Header -->
+    <header class="pt-8 pb-4 text-center">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-orange-700 text-sm font-medium">
+        <span>🍴</span> กินอะไรดี? ให้วงล้อตัดสิน
+      </div>
+      <h1 class="mt-3 text-4xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-orange-500 via-red-500 to-amber-500 bg-clip-text text-transparent">
+        Food Wheel
+      </h1>
+      <p class="mt-1 text-stone-600 text-sm sm:text-base">วงล้อสุ่มเมนูอาหารตามงบและเงื่อนไขของคุณ</p>
+    </header>
 
-<!-- Header -->
-<header class="relative z-10 max-w-3xl mx-auto px-4 pt-5 flex items-center justify-between">
-  <div class="flex items-center gap-3">
-    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 grid place-items-center text-2xl shadow-lg">🍽️</div>
-    <div>
-      <h1 class="font-bold text-xl leading-tight">Food Wheel</h1>
-      <p class="text-xs text-orange-900/60 -mt-0.5">วงล้อสุ่มเมนูอาหาร · กินอะไรดีวันนี้?</p>
+    <!-- Stepper -->
+    <nav id="stepper" class="flex items-center justify-center gap-2 sm:gap-3 my-5 text-xs sm:text-sm" aria-label="ขั้นตอน"></nav>
+
+    <!-- STEP 1 : Category -->
+    <section id="view-category" class="fade-in">
+      <h2 class="text-center text-xl sm:text-2xl font-bold mb-5">วันนี้อยากกินอาหารแนวไหน?</h2>
+      <div id="cat-grid" class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5"></div>
+    </section>
+
+    <!-- STEP 2 : Filters -->
+    <section id="view-filters" class="hidden max-w-xl mx-auto">
+      <div class="glass rounded-3xl p-5 sm:p-8 fade-in">
+        <div class="flex items-center gap-3 mb-5">
+          <div id="f-icon" class="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-400 to-red-500 grid place-items-center text-3xl shadow-lg"></div>
+          <div>
+            <p class="text-xs text-stone-500">หมวดหมู่ที่เลือก</p>
+            <h2 id="f-name" class="text-xl font-bold"></h2>
+          </div>
+          <button id="btn-back-cat" class="ml-auto text-sm text-orange-600 hover:text-orange-800 font-medium underline underline-offset-4">เปลี่ยน</button>
+        </div>
+
+        <label class="block text-sm font-semibold mb-2">💰 งบประมาณต่อมื้อ (บาท)</label>
+        <div id="budget-chips" class="flex flex-wrap gap-2 mb-3"></div>
+        <div class="relative mb-6">
+          <input id="budget-input" type="number" inputmode="numeric" min="0" step="10" placeholder="หรือพิมพ์งบของคุณเอง เช่น 120"
+            class="w-full rounded-2xl border border-orange-200 bg-white/80 px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-orange-400" />
+          <span class="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 text-sm">฿</span>
+        </div>
+
+        <label class="block text-sm font-semibold mb-2">🥗 ข้อจำกัดเพิ่มเติม <span class="font-normal text-stone-500">(ไม่บังคับ)</span></label>
+        <input id="diet-input" type="text" placeholder='เช่น "ไม่เผ็ด", "ทานเจ", "งดเนื้อวัว"'
+          class="w-full rounded-2xl border border-orange-200 bg-white/80 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400" />
+        <div id="diet-quick" class="flex flex-wrap gap-2 mt-3"></div>
+        <p id="diet-detect" class="mt-3 text-xs text-emerald-700 min-h-[1rem]"></p>
+
+        <p id="f-error" class="hidden mt-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2"></p>
+
+        <button id="btn-generate" class="spin-btn w-full mt-6 rounded-2xl py-4 text-white font-bold text-lg">
+          🍽️ ดึงเมนูอาหาร &amp; สร้างวงล้อสุ่ม
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 3 : Loading -->
+    <section id="view-loading" class="hidden">
+      <div class="glass rounded-3xl p-10 max-w-md mx-auto text-center fade-in">
+        <div class="loader mx-auto"></div>
+        <p class="mt-5 font-semibold text-lg">กำลังคัดเมนูอร่อยๆ ให้คุณ...</p>
+        <p id="loading-sub" class="text-sm text-stone-500 mt-1"></p>
+      </div>
+    </section>
+
+    <!-- STEP 4 : Wheel -->
+    <section id="view-wheel" class="hidden">
+      <div class="grid lg:grid-cols-[minmax(0,1fr)_380px] gap-6 items-start">
+        <!-- Wheel -->
+        <div class="glass rounded-3xl p-4 sm:p-8 flex flex-col items-center fade-in">
+          <div id="summary" class="flex flex-wrap justify-center gap-2 mb-4 text-xs"></div>
+
+          <div id="wheel-wrap" class="relative w-[min(86vw,440px)] aspect-square mt-3">
+            <!-- pointer -->
+            <svg id="pointer" class="absolute left-1/2 -translate-x-1/2 -top-4 z-20" width="46" height="60" viewBox="0 0 46 60" aria-hidden="true">
+              <path d="M23 58 C23 58 3 30 3 20 A20 20 0 1 1 43 20 C43 30 23 58 23 58 Z" fill="#b91c1c" stroke="#fff" stroke-width="3"/>
+              <circle cx="23" cy="20" r="7" fill="#fff"/>
+            </svg>
+            <canvas id="wheel" class="w-full h-full rounded-full" aria-label="วงล้อสุ่มเมนูอาหาร"></canvas>
+            <button id="btn-center" aria-label="หมุนวงล้อ"
+              class="spin-btn absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-[22%] aspect-square rounded-full text-white font-extrabold text-sm sm:text-base border-4 border-white">
+              SPIN
+            </button>
+          </div>
+
+          <button id="btn-spin" class="spin-btn mt-7 w-full max-w-sm rounded-2xl py-4 text-white font-extrabold text-xl tracking-wide">
+            🎲 SPIN (หมุนวงล้อ)
+          </button>
+
+          <div class="mt-4 flex flex-wrap justify-center gap-2 text-sm">
+            <button id="btn-reroll" class="px-4 py-2 rounded-full bg-white/80 border border-orange-200 hover:bg-orange-50 font-medium">🔄 ลองสุ่มเมนูชุดใหม่</button>
+            <button id="btn-edit" class="px-4 py-2 rounded-full bg-white/80 border border-orange-200 hover:bg-orange-50 font-medium">⚙️ แก้ไขเงื่อนไข</button>
+            <button id="btn-change-cat" class="px-4 py-2 rounded-full bg-white/80 border border-orange-200 hover:bg-orange-50 font-medium">🍱 เปลี่ยนหมวดหมู่</button>
+            <button id="btn-sound" class="px-4 py-2 rounded-full bg-white/80 border border-orange-200 hover:bg-orange-50 font-medium" aria-pressed="true">🔊 เสียง</button>
+          </div>
+        </div>
+
+        <!-- Menu list -->
+        <aside class="glass rounded-3xl p-5 fade-in">
+          <h3 class="font-bold text-lg mb-1">📋 เมนูในวงล้อ</h3>
+          <p id="notice" class="hidden text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mb-3"></p>
+          <ul id="menu-list" class="space-y-2 mt-3"></ul>
+        </aside>
+      </div>
+    </section>
+
+    <footer class="text-center text-xs text-stone-500 mt-10">
+      ราคาและแคลอรีเป็นค่าโดยประมาณ · ทำงานแบบออฟไลน์ ไม่ต้องใช้ API ภายนอก
+    </footer>
+  </div>
+
+  <!-- Winner Modal -->
+  <div id="modal" class="hidden-modal fixed inset-0 z-50 grid place-items-center p-4 bg-black/55 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="m-name">
+    <div class="card relative w-full max-w-md rounded-3xl bg-gradient-to-b from-white to-orange-50 p-6 sm:p-8 text-center shadow-2xl border border-orange-200">
+      <button id="m-close" class="absolute top-3 right-4 text-2xl text-stone-400 hover:text-stone-700" aria-label="ปิด">×</button>
+      <div class="text-6xl pop">🎉</div>
+      <p class="mt-2 text-orange-600 font-semibold">ยินดีด้วย! วันนี้คุณต้องกิน...</p>
+      <h2 id="m-name" class="mt-2 text-3xl sm:text-4xl font-extrabold leading-tight bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent"></h2>
+      <div class="mt-4 flex justify-center gap-3">
+        <span id="m-price" class="px-4 py-2 rounded-2xl bg-amber-100 text-amber-800 font-semibold"></span>
+        <span id="m-cal" class="px-4 py-2 rounded-2xl bg-red-100 text-red-700 font-semibold"></span>
+      </div>
+      <p id="m-reason" class="mt-4 text-stone-600 text-sm bg-white/70 rounded-2xl px-4 py-3 border border-orange-100"></p>
+      <div class="mt-6 grid grid-cols-2 gap-2">
+        <button id="m-again" class="spin-btn rounded-2xl py-3 text-white font-bold">🎲 หมุนอีกครั้ง</button>
+        <button id="m-reroll" class="rounded-2xl py-3 bg-white border border-orange-300 text-orange-700 font-semibold hover:bg-orange-50">🔄 ชุดเมนูใหม่</button>
+      </div>
+      <button id="m-cat" class="mt-3 text-sm text-stone-500 hover:text-orange-600 underline underline-offset-4">เปลี่ยนหมวดหมู่</button>
     </div>
   </div>
-  <button id="muteBtn" class="btn-ghost w-11 h-11 rounded-full text-lg" title="เปิด/ปิดเสียง" aria-label="เปิดปิดเสียง">🔊</button>
-</header>
-
-<!-- Stepper -->
-<nav class="relative z-10 max-w-3xl mx-auto px-4 mt-5" aria-label="ขั้นตอน">
-  <ol class="flex items-center justify-between text-[11px] sm:text-xs text-orange-900/70">
-    <li class="flex flex-col items-center gap-1 flex-1"><span class="dot w-8 h-8 rounded-full grid place-items-center bg-white/70 font-semibold">1</span>หมวดหมู่</li>
-    <li class="h-0.5 flex-1 bg-orange-200 -mt-5"></li>
-    <li class="flex flex-col items-center gap-1 flex-1"><span class="dot w-8 h-8 rounded-full grid place-items-center bg-white/70 font-semibold">2</span>เงื่อนไข</li>
-    <li class="h-0.5 flex-1 bg-orange-200 -mt-5"></li>
-    <li class="flex flex-col items-center gap-1 flex-1"><span class="dot w-8 h-8 rounded-full grid place-items-center bg-white/70 font-semibold">3</span>ดึงเมนู</li>
-    <li class="h-0.5 flex-1 bg-orange-200 -mt-5"></li>
-    <li class="flex flex-col items-center gap-1 flex-1"><span class="dot w-8 h-8 rounded-full grid place-items-center bg-white/70 font-semibold">4</span>วงล้อ</li>
-  </ol>
-</nav>
-
-<main class="relative z-10 max-w-3xl mx-auto px-4 py-6 pb-16">
-
-  <!-- STEP 1 -->
-  <section id="step1" class="step">
-    <div class="glass rounded-3xl p-5 sm:p-7">
-      <h2 class="text-2xl font-bold">วันนี้อยากกินอาหารแนวไหน?</h2>
-      <p class="text-orange-900/70 mt-1 mb-5">เลือกหมวดหมู่ที่ชอบ หรือให้เราสุ่มให้ทั้งหมดเลย</p>
-      <div id="catGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4"></div>
-    </div>
-  </section>
-
-  <!-- STEP 2 -->
-  <section id="step2" class="step">
-    <div class="glass rounded-3xl p-5 sm:p-7">
-      <div class="flex items-center justify-between gap-3 flex-wrap">
-        <h2 class="text-2xl font-bold">กำหนดเงื่อนไขของมื้อนี้</h2>
-        <span id="selCatBadge" class="px-3 py-1.5 rounded-full bg-orange-500 text-white text-sm font-medium"></span>
-      </div>
-
-      <div class="mt-6">
-        <label for="budget" class="block font-semibold mb-2">💰 งบประมาณประจำมื้อ (บาท)</label>
-        <div class="flex flex-wrap gap-2 mb-3" id="budgetChips"></div>
-        <div class="relative">
-          <input id="budget" type="number" inputmode="numeric" min="1" max="9999" placeholder="เช่น 100"
-                 class="field w-full rounded-2xl border border-orange-200 bg-white/90 px-4 py-3 pr-14 text-lg">
-          <span class="absolute right-4 top-1/2 -translate-y-1/2 text-orange-900/50">บาท</span>
-        </div>
-        <p class="text-xs text-orange-900/60 mt-1.5">ตั้งแต่ 300 บาทขึ้นไปจะถือว่าไม่จำกัดงบ</p>
-      </div>
-
-      <div class="mt-6">
-        <label for="restr" class="block font-semibold mb-2">🚫 ข้อจำกัดเพิ่มเติม <span class="font-normal text-orange-900/60">(ไม่บังคับ)</span></label>
-        <div class="flex flex-wrap gap-2 mb-3" id="restrChips"></div>
-        <input id="restr" type="text" placeholder="เช่น ไม่เผ็ด, ทานเจ, งดเนื้อวัว"
-               class="field w-full rounded-2xl border border-orange-200 bg-white/90 px-4 py-3">
-      </div>
-
-      <details class="mt-6 rounded-2xl bg-white/70 border border-orange-200 px-4 py-3">
-        <summary class="cursor-pointer font-semibold select-none">✨ ใช้ Gemini AI เจนเมนูสดๆ (ไม่บังคับ)</summary>
-        <div class="mt-3 space-y-3">
-          <input id="apiKey" type="password" autocomplete="off" placeholder="ใส่ Gemini API Key"
-                 class="field w-full rounded-xl border border-orange-200 bg-white px-3 py-2.5">
-          <label class="flex items-center gap-2 text-sm"><input id="useAI" type="checkbox" class="w-4 h-4 accent-orange-600"> เปิดใช้ AI สร้างเมนู (ถ้าไม่ได้ตั้งค่า/เกิดข้อผิดพลาด จะใช้ฐานข้อมูลออฟไลน์แทนอัตโนมัติ)</label>
-          <p class="text-xs text-orange-900/60">คีย์จะถูกเก็บไว้ในเบราว์เซอร์ของคุณเท่านั้น (localStorage) และถูกส่งตรงไปยัง Google Generative Language API ขอรับคีย์ได้ที่ Google AI Studio</p>
-        </div>
-      </details>
-
-      <div class="mt-7 flex flex-col-reverse sm:flex-row gap-3">
-        <button id="back1" class="btn-ghost rounded-2xl px-5 py-3.5">← เปลี่ยนหมวดหมู่</button>
-        <button id="genBtn" class="btn-primary rounded-2xl px-5 py-3.5 text-lg flex-1">🍜 ดึงเมนูอาหาร &amp; สร้างวงล้อสุ่ม</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- STEP 3 -->
-  <section id="step3" class="step">
-    <div class="glass rounded-3xl p-8 sm:p-12 text-center">
-      <div class="spinner mx-auto"></div>
-      <h2 class="text-xl font-bold mt-6">กำลังดึงเมนูอาหาร…</h2>
-      <p id="loadMsg" class="text-orange-900/70 mt-2 min-h-[1.5rem]"></p>
-    </div>
-  </section>
-
-  <!-- STEP 4 -->
-  <section id="step4" class="step">
-    <div class="glass rounded-3xl p-5 sm:p-7">
-      <div class="flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <h2 class="text-2xl font-bold">หมุนเลย! วันนี้กินอะไรดี 🎡</h2>
-          <p id="summaryLine" class="text-sm text-orange-900/70 mt-1"></p>
-        </div>
-        <span id="sourceBadge" class="px-3 py-1 rounded-full bg-white/80 border border-orange-200 text-xs font-medium"></span>
-      </div>
-
-      <div class="mt-8 mb-4 px-2">
-        <div id="wheelWrap">
-          <svg id="pointer" viewBox="0 0 60 80" aria-hidden="true">
-            <defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fde68a"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs>
-            <path d="M30 78 L6 30 A26 26 0 1 1 54 30 Z" fill="url(#pg)" stroke="#92400e" stroke-width="3" stroke-linejoin="round"/>
-            <circle cx="30" cy="26" r="9" fill="#dc2626" stroke="#7f1d1d" stroke-width="2"/>
-          </svg>
-          <canvas id="wheelCanvas" aria-label="วงล้อสุ่มเมนูอาหาร"></canvas>
-          <button id="spinCenter" aria-label="หมุนวงล้อ">SPIN</button>
-        </div>
-      </div>
-
-      <button id="spinBtn" class="btn-primary w-full rounded-2xl py-4 text-xl mt-2">🎲 SPIN (หมุนวงล้อ)</button>
-
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4">
-        <button id="againBtn" class="btn-ghost rounded-xl py-2.5 text-sm">🔄 ลองหมุนใหม่</button>
-        <button id="regenBtn" class="btn-ghost rounded-xl py-2.5 text-sm">🎲 สุ่มเมนูชุดใหม่</button>
-        <button id="editBtn" class="btn-ghost rounded-xl py-2.5 text-sm">⚙️ ปรับเงื่อนไข</button>
-        <button id="catBtn" class="btn-ghost rounded-xl py-2.5 text-sm">🏠 เปลี่ยนหมวดหมู่</button>
-      </div>
-
-      <div class="mt-6">
-        <h3 class="font-semibold mb-2">📋 เมนูบนวงล้อ</h3>
-        <ul id="menuList" class="grid sm:grid-cols-2 gap-2"></ul>
-      </div>
-    </div>
-  </section>
-</main>
-
-<!-- Winner modal -->
-<div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/55 backdrop-blur-sm" role="dialog" aria-modal="true">
-  <div class="pop relative w-full max-w-md rounded-[2rem] overflow-hidden bg-gradient-to-b from-white to-orange-50 shadow-2xl">
-    <div class="bg-gradient-to-br from-orange-500 via-red-500 to-amber-500 text-white text-center px-6 pt-8 pb-10">
-      <div class="text-6xl bounce">🎉</div>
-      <p class="mt-2 text-lg font-medium opacity-95">ยินดีด้วย! วันนี้คุณต้องกิน…</p>
-      <h3 id="mName" class="text-3xl font-bold mt-1 leading-snug break-words"></h3>
-    </div>
-    <div class="px-6 pb-6 -mt-5">
-      <div class="grid grid-cols-2 gap-3">
-        <div class="rounded-2xl bg-white shadow-lg p-3 text-center border border-orange-100">
-          <div class="text-xs text-orange-900/60">ราคาโดยประมาณ</div>
-          <div class="text-2xl font-bold text-orange-600">฿<span id="mPrice"></span></div>
-        </div>
-        <div class="rounded-2xl bg-white shadow-lg p-3 text-center border border-orange-100">
-          <div class="text-xs text-orange-900/60">แคลอรีโดยประมาณ</div>
-          <div class="text-2xl font-bold text-red-600"><span id="mCal"></span> <span class="text-sm font-medium">kcal</span></div>
-        </div>
-      </div>
-      <div class="mt-4 rounded-2xl bg-amber-50 border border-amber-200 p-4">
-        <div class="font-semibold text-amber-900 mb-1">😋 ทำไมน่าทาน</div>
-        <p id="mWhy" class="text-sm text-amber-900/85 leading-relaxed"></p>
-      </div>
-      <div class="mt-5 flex gap-3">
-        <button id="mClose" class="btn-ghost flex-1 rounded-2xl py-3">ปิด</button>
-        <button id="mAgain" class="btn-primary flex-1 rounded-2xl py-3">🎲 หมุนอีกครั้ง</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="toast" class="fixed left-1/2 bottom-6 -translate-x-1/2 z-[70] hidden max-w-[90vw] px-4 py-2.5 rounded-full bg-orange-950/90 text-white text-sm shadow-xl"></div>
 
 <script>
 /* =========================================================
-   Config
+   1) LOCAL DATASET  —  [ชื่อเมนู, ราคา(฿), แคลอรี(kcal), tags, เหตุผลน่าทาน]
+   tags: s=เผ็ด, v=ปรับเป็นเจ/มังสวิรัติได้, b=เนื้อวัว, p=หมู, c=ไก่, f=อาหารทะเล/ปลา
    ========================================================= */
-const GEMINI_MODEL = 'gemini-2.5-flash';   // เปลี่ยนรุ่นโมเดลได้ที่นี่
-const WHEEL_SIZE = 8;
-
-const CATEGORIES = {
-  thai:     { name: 'อาหารไทย',        icon: '🇹🇭', desc: 'กะเพรา ผัดไทย ต้มยำ' },
-  chinese:  { name: 'อาหารจีน',        icon: '🇨🇳', desc: 'ติ่มซำ เป็ด บะหมี่' },
-  japanese: { name: 'อาหารญี่ปุ่น',    icon: '🇯🇵', desc: 'ราเมน ซูชิ ข้าวหน้า' },
-  european: { name: 'อาหารยุโรป',      icon: '🇪🇺', desc: 'พาสต้า สเต๊ก พิซซ่า' },
-  isan:     { name: 'อาหารอีสาน',      icon: '🌶️', desc: 'ส้มตำ ลาบ ไก่ย่าง' },
-  all:      { name: 'สุ่มทุกหมวดหมู่', icon: '🎲', desc: 'ให้ดวงเป็นคนเลือก' }
+const RAW = {
+  thai: [
+    ['ผัดไทยกุ้งสด', 80, 550, 'fv', 'เส้นจันท์เหนียวนุ่ม รสเปรี้ยวหวานกลมกล่อม ใส่ถั่วงอกกรุบกรอบ'],
+    ['ข้าวกะเพราหมูสับไข่ดาว', 60, 620, 'spv', 'หอมกะเพราไฟแรง ไข่ดาวกรอบขอบ กินง่ายจานเดียวจบ'],
+    ['ต้มยำกุ้งน้ำข้น', 150, 320, 'sf', 'เปรี้ยว เผ็ด หอมสมุนไพร กุ้งตัวโตหวานฉ่ำ'],
+    ['ข้าวหมูกรอบ', 70, 650, 'p', 'หนังกรอบเปราะ เนื้อนุ่ม ราดน้ำจิ้มหวานอร่อยสุดๆ'],
+    ['ข้าวซอยไก่', 70, 580, 'c', 'น้ำแกงกะทิหอมมัน เส้นหมี่กรอบโรยหน้า สไตล์เหนือแท้'],
+    ['แกงเขียวหวานไก่', 80, 560, 'scv', 'กะทิเข้มข้น หอมใบโหระพา ราดข้าวสวยร้อนๆ'],
+    ['ข้าวมันไก่', 50, 590, 'c', 'ข้าวมันหอมนุ่ม ไก่ต้มเนียน น้ำจิ้มเต้าเจี้ยวรสเด็ด'],
+    ['ข้าวขาหมู', 70, 690, 'p', 'ขาหมูตุ๋นเปื่อยนุ่ม น้ำพะโล้เข้มข้น ไข่ต้มฟูฟ่อง'],
+    ['ก๋วยเตี๋ยวเรือหมู', 50, 380, 'p', 'น้ำซุปเข้มข้นหอมเครื่องเทศ กินได้หลายชามไม่เลี่ยน'],
+    ['ผัดซีอิ๊วหมู', 60, 560, 'pv', 'เส้นใหญ่หอมไหม้กระทะ ผักคะน้ากรอบ หวานเค็มกำลังดี'],
+    ['ข้าวผัดปู', 100, 520, 'f', 'เนื้อปูแน่นๆ ข้าวร่วนหอมไข่ บีบมะนาวเพิ่มความสดชื่น'],
+    ['แกงมัสมั่นไก่', 90, 610, 'c', 'หวานมันหอมเครื่องเทศ มันฝรั่งเปื่อยละลายในปาก'],
+    ['ผัดผักบุ้งไฟแดงกับข้าว', 55, 430, 'v', 'ผักบุ้งกรอบสดไฟแดง กระเทียมหอมฟุ้ง ได้ผักเต็มๆ'],
+    ['ข้าวไข่เจียวหมูสับ', 40, 540, 'p', 'ไข่ฟูกรอบนอกนุ่มใน ราดซอสพริกอร่อยง่ายๆ ประหยัดด้วย'],
+    ['ผัดพริกแกงถั่วฝักยาวหมู', 65, 520, 'spv', 'พริกแกงหอมเข้ม ถั่วฝักยาวกรอบ ข้าวหมดจานแน่นอน'],
+    ['ต้มข่าไก่', 90, 380, 'cv', 'น้ำซุปกะทิหอมข่า เปรี้ยวหวานนุ่มนวล อุ่นท้อง'],
+    ['ข้าวต้มปลา', 60, 320, 'f', 'น้ำซุปใส หอมขิง เบาท้อง เหมาะมื้อสบายๆ'],
+    ['ปลากะพงทอดน้ำปลากับข้าว', 220, 680, 'f', 'เนื้อปลาหวานฉ่ำ หนังกรอบ ราดน้ำปลาหอมกระเทียมเจียว'],
+    ['ผัดกะเพราทะเล', 120, 500, 'sfv', 'กุ้ง หมึก หอยครบ รสจัดจ้านถึงใจ'],
+    ['ผัดฟักทองใส่ไข่กับข้าว', 50, 400, 'v', 'ฟักทองหวานนุ่ม ไข่หอมมัน อิ่มอร่อยประหยัด']
+  ],
+  chinese: [
+    ['ข้าวผัดหยางโจว', 70, 580, 'pf', 'ข้าวผัดหอมกระทะ ใส่กุ้ง แฮม ไข่ ครบรสแบบจีนแท้'],
+    ['ติ่มซำชุดรวม', 120, 450, 'pf', 'ฮะเก๋า ขนมจีบ ซาลาเปา ลองหลายอย่างในมื้อเดียว'],
+    ['หมาล่าเสียบไม้', 150, 520, 'spv', 'ชาปากเผ็ดซ่า เลือกเสียบได้หลากหลาย สายเผ็ดต้องลอง'],
+    ['บะหมี่เกี๊ยวหมูแดง', 60, 450, 'p', 'เส้นเหนียวนุ่ม เกี๊ยวห่อแน่น หมูแดงหวานหอม'],
+    ['ผัดจับฉ่าย', 60, 250, 'v', 'ผักรวมหลากชนิด แคลอรีต่ำ ได้วิตามินเต็มๆ'],
+    ['ข้าวหน้าเป็ดย่าง', 90, 700, '', 'หนังเป็ดกรอบ เนื้อฉ่ำ ราดน้ำจิ้มบ๊วยหวานอมเปรี้ยว'],
+    ['ข้าวหมูแดง', 60, 600, 'p', 'หมูแดงหมักหอม ราดซอสเข้มข้น เสิร์ฟพร้อมไข่ต้ม'],
+    ['ราดหน้าเส้นใหญ่กรอบ', 70, 620, 'p', 'เส้นกรอบหอม ราดน้ำเหนียวนุ่มเต็มจาน'],
+    ['เกาเหลาเลือดหมู', 60, 300, 'p', 'น้ำซุปหอมกระดูกหมู เนื้อนุ่ม ไม่ต้องกินเส้นก็อิ่ม'],
+    ['โจ๊กหมูใส่ไข่', 40, 350, 'p', 'โจ๊กเนียนละเอียด ขิงซอยหอม อุ่นท้องมื้อเช้า'],
+    ['ผัดหมี่ฮ่องกงหมู', 70, 580, 'pv', 'เส้นหมี่ผัดไฟแรง หอมซีอิ๊ว ผักกรอบสด'],
+    ['เป็ดปักกิ่ง (ชุดเล็ก)', 280, 750, '', 'หนังเป็ดกรอบฉ่ำ ห่อแผ่นแป้งกับต้นหอมและซอสหอมเตียน'],
+    ['หมาล่าหม้อไฟเดี่ยว', 180, 600, 'sbp', 'น้ำซุปเผ็ดชาซ่า จุ่มเนื้อและผักตามใจ'],
+    ['เต้าหู้ผัดซอสเสฉวน', 80, 420, 'spv', 'เต้าหู้นุ่มราดซอสเผ็ดชา หอมพริกเสฉวน'],
+    ['ซาลาเปาไส้หมูสับ 2 ลูก', 40, 380, 'pv', 'แป้งนุ่มฟู ไส้แน่นๆ กินเล่นหรือรองท้องก็ดี'],
+    ['ผัดผักกวางตุ้งน้ำมันหอย', 70, 260, 'v', 'ผักกรอบหวาน ซอสน้ำมันหอยเข้มข้น เบาๆ สบายท้อง'],
+    ['ราดหน้าหมูหมักนุ่ม', 60, 480, 'pv', 'น้ำราดหนืดหอมเต้าเจี้ยว เส้นผัดไหม้หอมกระทะ'],
+    ['ไก่ผัดเม็ดมะม่วงหิมพานต์', 90, 520, 'cv', 'หวานเค็มกลมกล่อม เม็ดมะม่วงกรอบมัน กินกับข้าวสวยเพลิน'],
+    ['ก๋วยจั๊บน้ำข้น', 60, 400, 'p', 'เส้นม้วนหยุ่นเหนียว น้ำซุปพริกไทยหอมฉุย'],
+    ['ปลานึ่งซีอิ๊ว', 250, 380, 'f', 'เนื้อปลานุ่มหวาน ขิงต้นหอมหอมกรุ่น เบาและสดสะอาด'],
+    ['ผัดเห็ดหอมน้ำมันหอยกับข้าว', 70, 450, 'v', 'เห็ดหอมเนื้อหนานุ่ม ซอสเข้มข้นกลมกล่อม']
+  ],
+  japanese: [
+    ['ข้าวหน้าเนื้อ (กิวด้ง)', 120, 700, 'b', 'เนื้อสไลซ์นุ่ม ซอสหวานเค็ม ไข่ออนเซ็นละลายบนข้าว'],
+    ['ข้าวแกงกะหรี่ทงคัตสึ', 130, 850, 'p', 'ซอสกะหรี่ข้นหอม หมูชุบแป้งกรอบ จานนี้ฟินสุด'],
+    ['ซูชิเซต 8 ชิ้น', 180, 400, 'f', 'ข้าวส้มหอมเปรี้ยวหวาน ปลาสดคำโต เบาท้อง'],
+    ['ราเมงทงคตสึ', 150, 620, 'p', 'น้ำซุปกระดูกหมูเข้มข้น เส้นเหนียวนุ่ม ชาชูละลายในปาก'],
+    ['ทงคัตสึข้าว', 120, 750, 'p', 'หมูชุบเกล็ดขนมปังกรอบนอกนุ่มใน เสิร์ฟพร้อมกะหล่ำปลีซอย'],
+    ['ข้าวหน้าปลาแซลมอน', 190, 600, 'f', 'แซลมอนสดมันละมุน ข้าวญี่ปุ่นนุ่มหอม'],
+    ['อุด้งน้ำซุปเห็ด', 90, 360, 'v', 'เส้นอุด้งหนึบหนับ น้ำซุปใสหอมเห็ด เบาสบายท้อง'],
+    ['ข้าวหน้าไก่ไข่ (โอยาโกะด้ง)', 100, 650, 'c', 'ไก่นุ่มกับไข่ฟูเยิ้ม ราดข้าวร้อนๆ อบอุ่นหัวใจ'],
+    ['ยากิโซบะ', 90, 560, 'pv', 'เส้นผัดซอสหวานเค็ม หอมปลาโอแห้งเต้นระบำ'],
+    ['เทมปุระชุดข้าว', 140, 650, 'fv', 'ทอดกรอบเบาๆ ไม่อมน้ำมัน จิ้มซอสเทนสึยุ'],
+    ['ข้าวหน้าไก่เทริยากิ', 100, 620, 'c', 'ไก่ย่างเคลือบซอสเทริยากิเงา หอมหวานเข้มข้น'],
+    ['โซบะเย็น (ซารุโซบะ)', 90, 330, 'v', 'เส้นโซบะเย็นชื่นใจ จิ้มซอสเย็น เหมาะวันร้อน'],
+    ['โอนิกิริ 3 ชิ้น', 60, 350, 'v', 'ข้าวปั้นห่อสาหร่ายกรอบ พกง่าย อิ่มพอดี'],
+    ['ทาโกะยากิ 6 ลูก', 60, 380, 'f', 'ร้อนๆ กรอบนอกนุ่มใน หมึกชิ้นโต ซอสหอมมายองเนส'],
+    ['ยากินิกุชุดย่างเนื้อ', 280, 750, 'b', 'เนื้อย่างหอมควันเตา จิ้มซอสทาเระรสเข้ม'],
+    ['ทามาโกะด้ง', 70, 520, 'v', 'ไข่หวานนุ่มราดข้าวร้อน อบอุ่น ง่ายและอร่อย'],
+    ['แกงกะหรี่ญี่ปุ่นผัก', 90, 560, 'v', 'ซอสกะหรี่หอมหวาน แครอท มันฝรั่งนุ่มละมุน'],
+    ['เทปันยากิสเต๊กเนื้อ', 300, 650, 'b', 'เนื้อย่างหน้าเตาร้อนๆ หอมเนย กระเทียมเจียว'],
+    ['โอโคโนมิยากิ', 100, 600, 'pf', 'แพนเค้กกะหล่ำปลีสไตล์ญี่ปุ่น ราดซอสหวาน มายองเนส'],
+    ['ปลาซาบะย่างชุดมิโซะ', 130, 520, 'f', 'ปลามันหอมเกลือ เสิร์ฟพร้อมซุปมิโซะอุ่นๆ'],
+    ['บูตะโชงะ (หมูผัดขิง)', 90, 600, 'p', 'หมูสไลซ์ผัดซีอิ๊วขิงหอมๆ กินกับข้าวร้อนๆ'],
+    ['ข้าวหน้าเต้าหู้เทริยากิ', 90, 480, 'v', 'เต้าหู้ทอดเคลือบซอสหอมหวาน โปรตีนจากพืช']
+  ],
+  european: [
+    ['สปาเกตตีคาโบนาร่า', 150, 750, 'p', 'ซอสครีมไข่เข้มข้น เบคอนกรอบหอม พาร์เมซานเต็มคำ'],
+    ['สเต๊กหมูพร้อมเฟรนช์ฟราย', 120, 720, 'p', 'หมูย่างฉ่ำ ราดซอสเข้ม เคียงมันฝรั่งทอดกรอบ'],
+    ['สเต๊กเนื้อริบอาย', 350, 850, 'b', 'เนื้อสไลซ์หนา ฉ่ำมัน ย่างระดับที่ชอบ'],
+    ['พิซซ่าแฮมชีส', 200, 800, 'p', 'แป้งบางกรอบ ชีสยืดเยิ้ม แบ่งกินกับเพื่อนก็ดี'],
+    ['ผักโขมอบชีส', 130, 450, 'v', 'ผักโขมนุ่มหอมครีม ชีสละลายทับหน้า ได้ผักเต็มๆ'],
+    ['เบอร์เกอร์เนื้อชีส', 140, 780, 'b', 'เนื้อแพตตี้ฉ่ำ ชีสเยิ้ม ผักสดกรอบ'],
+    ['สปาเกตตีขี้เมาทะเล', 140, 620, 'sf', 'เผ็ดจัดจ้านแบบไทยๆ กุ้งหมึกครบ ผัดไฟแรง'],
+    ['ลาซานญ่า', 160, 680, 'b', 'ชั้นเส้นพาสต้า ซอสเนื้อ และชีสอบจนหอมกรุ่น'],
+    ['สเต๊กไก่ซอสเห็ด', 110, 600, 'c', 'ไก่นุ่มฉ่ำ ซอสเห็ดครีมหอมละมุน'],
+    ['ฟิชแอนด์ชิปส์', 180, 740, 'f', 'ปลาทอดกรอบฟู เนื้อขาวนุ่ม เคียงมันฝรั่งทอดและซอสทาร์ทาร์'],
+    ['สปาเกตตีซอสมะเขือเทศผัก', 110, 520, 'v', 'ซอสมะเขือเทศสดเปรี้ยวหวาน โรยโหระพา เบาสบาย'],
+    ['พิซซ่ามาร์เกอริต้า', 180, 700, 'v', 'มะเขือเทศ ชีสโมซซาเรลล่า โหระพา คลาสสิกที่สุด'],
+    ['สลัดซีซาร์ไก่ย่าง', 120, 380, 'c', 'ผักกรอบสด ไก่ย่างหอม แคลอรีต่ำแต่อิ่มพอดี'],
+    ['รีซอตโต้เห็ดทรัฟเฟิล', 200, 560, 'v', 'ข้าวนุ่มเนียน หอมเห็ดและทรัฟเฟิล หรูหราในจานเดียว'],
+    ['แซนด์วิชคลับ', 90, 520, 'pc', 'ขนมปังปิ้งกรอบ เบคอน ไก่ ไข่ ผักสด หยิบกินง่าย'],
+    ['ซุปเห็ดครีมกับขนมปัง', 80, 320, 'v', 'ซุปเนียนละมุน จิ้มขนมปังอุ่นๆ อบอุ่นท้อง'],
+    ['สเต๊กแซลมอนย่างเนย', 280, 520, 'f', 'แซลมอนหนังกรอบ เนื้อฉ่ำ ราดซอสเนยมะนาว'],
+    ['มักกะโรนีอบชีส', 120, 640, 'v', 'ชีสเยิ้มหนืด เส้นนุ่ม อบหน้ากรอบ ฟินสุดๆ'],
+    ['ไก่อบสมุนไพรเสิร์ฟมันบด', 160, 640, 'c', 'ไก่อบหอมโรสแมรี่ เนื้อฉ่ำ เคียงมันบดเนียนนุ่ม'],
+    ['สลัดผักชีสแพะ', 100, 280, 'v', 'ผักสดหลากสี ชีสแพะหอม เบาๆ สุขภาพดี'],
+    ['ออมเล็ตผักชีสกับขนมปัง', 80, 420, 'v', 'ไข่ฟูนุ่มห่อผักและชีส เหมาะมื้อสายๆ']
+  ],
+  isan: [
+    ['ส้มตำไทย', 45, 120, 'sv', 'เปรี้ยว หวาน เผ็ด กรอบสด ได้ผักเน้นๆ'],
+    ['ตำปูปลาร้า', 55, 130, 'sf', 'ปลาร้าหอมเค็มจัดจ้าน ปูดองคู่ส้มตำ รสแซ่บถึงใจ'],
+    ['ลาบหมู', 60, 350, 'sp', 'หมูสับหอมข้าวคั่ว มะนาวเปรี้ยวจี๊ด สมุนไพรสดชื่น'],
+    ['น้ำตกคอหมูย่าง', 70, 420, 'sp', 'คอหมูย่างหอมไหม้ คลุกน้ำตกรสแซ่บ ข้าวเหนียวมาเลย'],
+    ['ต้มแซ่บกระดูกอ่อน', 90, 380, 'sp', 'น้ำซุปเปรี้ยวเผ็ดหอมสมุนไพร กระดูกอ่อนกรอบนุ่ม'],
+    ['ไก่ย่างข้าวเหนียว', 80, 620, 'c', 'ไก่ย่างหมักเครื่องเทศ หนังกรอบ เนื้อฉ่ำ จิ้มแจ่วนัว'],
+    ['ซุปหน่อไม้', 50, 100, 'sv', 'หน่อไม้กรอบ หอมใบหอมและข้าวคั่ว แคลอรีต่ำ'],
+    ['คอหมูย่างข้าวเหนียว', 80, 600, 'p', 'คอหมูย่างฉ่ำมัน จิ้มน้ำจิ้มแจ่วหอมๆ'],
+    ['ก้อยเนื้อ', 100, 300, 'sb', 'เนื้อสดสับหอมสมุนไพร เปรี้ยวเผ็ดจัดจ้าน'],
+    ['แจ่วฮ้อน', 150, 500, 'spb', 'จิ้มจุ่มอีสานเข้มข้น เหมาะกินกับเพื่อนๆ'],
+    ['ส้มตำทะเล', 90, 180, 'sf', 'เปรี้ยวแซ่บ ใส่กุ้งปลาหมึกหอยจัดเต็ม'],
+    ['แหนมคลุก', 70, 220, 'sp', 'แหนมเปรี้ยวนัว ใส่ถั่วลิสงกรอบ พริกสด'],
+    ['ปีกไก่ทอดน้ำปลาข้าวเหนียว', 70, 500, 'c', 'ปีกไก่ทอดกรอบเค็มหอม กินเล่นหรือกินจริงก็อร่อย'],
+    ['ซี่โครงหมูย่างน้ำจิ้มแจ่ว', 100, 520, 'sp', 'ซี่โครงนุ่มหอมควัน จิ้มแจ่วเผ็ดหอมงา'],
+    ['ลาบเห็ด', 50, 180, 'sv', 'ลาบเห็ดหลายชนิด หอมข้าวคั่ว เหมาะสายเจ'],
+    ['ยำวุ้นเส้นรวมมิตร', 60, 260, 'sp', 'เส้นวุ้นนุ่มลื่น น้ำยำรสจัดจ้าน หมูสับ กุ้งแห้ง'],
+    ['ตำข้าวโพดไข่เค็ม', 55, 220, 'sv', 'ข้าวโพดหวานกรอบ ไข่เค็มมัน รสกลมกล่อม'],
+    ['ปลานิลเผาน้ำจิ้มซีฟู้ด', 120, 400, 'f', 'ปลาเผาเกลือหอมๆ เนื้อนุ่มหวาน'],
+    ['ไส้กรอกอีสานกับผักสด', 50, 380, 'p', 'เปรี้ยวหอมกระเทียม กินกับขิงและพริกสด'],
+    ['ข้าวเหนียวหมูปิ้ง', 50, 420, 'p', 'หมูหมักนุ่มหวานหอม ปิ้งร้อนๆ กินเพลิน'],
+    ['แกงอ่อมไก่', 70, 280, 'sc', 'แกงใส่ผักชีลาว หอมสมุนไพรอีสานแท้'],
+    ['ตำแตง', 40, 90, 'sv', 'แตงกวากรอบฉ่ำ รสแซ่บเปรี้ยวจี๊ด ราคาประหยัด'],
+    ['ตำถั่วฝักยาว', 40, 100, 'sv', 'ถั่วฝักยาวกรอบสด มะเขือเทศฉ่ำ ตำนัว'],
+    ['ลาบเต้าหู้', 50, 190, 'sv', 'ลาบโปรตีนจากเต้าหู้ หอมข้าวคั่วและสมุนไพร'],
+    ['แกงอ่อมผัก', 60, 120, 'sv', 'ผักหลากชนิดนุ่มหวาน กลิ่นผักชีลาวหอมฟุ้ง'],
+    ['ข้าวเหนียวปิ้งไข่', 40, 280, 'v', 'ข้าวเหนียวปิ้งหอมไหม้ ทาไข่หอมมัน กินง่ายๆ']
+  ]
 };
 
-const SLICE_COLORS = [
-  { bg: '#fdba74', fg: '#431407' }, { bg: '#dc2626', fg: '#ffffff' },
-  { bg: '#fcd34d', fg: '#431407' }, { bg: '#b91c1c', fg: '#ffffff' },
-  { bg: '#fb923c', fg: '#431407' }, { bg: '#ea580c', fg: '#ffffff' },
-  { bg: '#fde68a', fg: '#431407' }, { bg: '#c2410c', fg: '#ffffff' }
+const CATS = [
+  { id: 'thai',     icon: '🇹🇭', name: 'อาหารไทย',   sub: 'ผัดไทย กะเพรา ต้มยำ ข้าวซอย', grad: 'from-orange-400 to-red-500' },
+  { id: 'chinese',  icon: '🇨🇳', name: 'อาหารจีน',   sub: 'ติ่มซำ หมาล่า บะหมี่เกี๊ยว',   grad: 'from-red-500 to-rose-600' },
+  { id: 'japanese', icon: '🇯🇵', name: 'อาหารญี่ปุ่น', sub: 'ซูชิ ราเมง ทงคัตสึ ข้าวหน้าเนื้อ', grad: 'from-pink-400 to-red-500' },
+  { id: 'european', icon: '🇪🇺', name: 'อาหารยุโรป',  sub: 'พาสต้า สเต๊ก พิซซ่า เบอร์เกอร์', grad: 'from-amber-400 to-orange-500' },
+  { id: 'isan',     icon: '🌶️', name: 'อาหารอีสาน',  sub: 'ส้มตำ ลาบ น้ำตก คอหมูย่าง',    grad: 'from-lime-500 to-emerald-600' },
+  { id: 'all',      icon: '🎲', name: 'สุ่มทุกหมวดหมู่', sub: 'รวมทุกเมนูในคลัง ลุ้นเลย!', grad: 'from-violet-500 to-fuchsia-600' }
+];
+
+const DB = {};
+Object.keys(RAW).forEach(k => {
+  DB[k] = RAW[k].map(([name, price, cal, tags, reason]) => ({ name, price, cal, tags, reason, cat: k }));
+});
+DB.all = [].concat(...Object.keys(RAW).map(k => DB[k]));
+
+const PALETTE = [
+  { bg: '#f97316', fg: '#ffffff' }, { bg: '#fde68a', fg: '#7c2d12' },
+  { bg: '#ef4444', fg: '#ffffff' }, { bg: '#fed7aa', fg: '#7c2d12' },
+  { bg: '#f59e0b', fg: '#ffffff' }, { bg: '#fecaca', fg: '#7f1d1d' },
+  { bg: '#ea580c', fg: '#ffffff' }, { bg: '#fef3c7', fg: '#78350f' }
 ];
 
 /* =========================================================
-   Offline Menu Database
-   [ชื่อ, ราคา(บาท), แคลอรี(kcal), tags]
-   tags: spicy beef pork chicken seafood duck egg veg (ทานเจ/มังสวิรัติได้) vegAdj (ขอปรับเป็นเจได้)
+   2) STATE & HELPERS
    ========================================================= */
-const mk = (k, rows) => rows.map(([n, p, c, t = '']) => ({ n, p, c, t: t.split(' ').filter(Boolean), k }));
+const $ = id => document.getElementById(id);
+const state = { cat: null, budget: 100, diet: '', menus: [], notice: '' };
+let rot = Math.random() * Math.PI * 2, omega = 0, spinning = false, raf = 0, lastT = 0, lastIdx = -1;
+let labels = [];
+let actx = null, soundOn = true;
 
-const DB = {
-  thai: mk('thai', [
-    ['ข้าวกะเพราไก่ไข่ดาว', 60, 650, 'spicy chicken egg'],
-    ['ข้าวผัดหมู', 55, 580, 'pork egg vegAdj'],
-    ['ผัดไทยกุ้งสด', 80, 620, 'seafood egg vegAdj'],
-    ['ต้มยำกุ้งน้ำใส', 150, 220, 'spicy seafood'],
-    ['แกงเขียวหวานไก่', 70, 450, 'spicy chicken'],
-    ['ข้าวมันไก่', 50, 690, 'chicken'],
-    ['ราดหน้าหมู', 60, 480, 'pork'],
-    ['ก๋วยเตี๋ยวเรือ', 50, 350, 'pork beef'],
-    ['ข้าวขาหมู', 65, 750, 'pork egg'],
-    ['ผัดซีอิ๊วหมู', 55, 600, 'pork egg vegAdj'],
-    ['ข้าวหมูทอดกระเทียม', 60, 640, 'pork'],
-    ['ไข่เจียวหมูสับ + ข้าว', 45, 560, 'pork egg'],
-    ['ผัดผักรวมมิตร + ข้าว', 50, 400, 'veg'],
-    ['แกงส้มชะอมกุ้ง', 80, 300, 'spicy seafood'],
-    ['พะแนงหมู + ข้าว', 75, 520, 'pork'],
-    ['ข้าวผัดปู', 90, 560, 'seafood egg'],
-    ['ปลากะพงทอดน้ำปลา + ข้าว', 220, 780, 'seafood'],
-    ['ต้มข่าไก่', 120, 380, 'chicken'],
-    ['กุ้งอบวุ้นเส้น', 250, 480, 'seafood'],
-    ['ปูผัดผงกะหรี่', 320, 650, 'seafood egg'],
-    ['ข้าวเหนียวหมูปิ้ง', 40, 450, 'pork'],
-    ['ผัดเผ็ดปลาดุก + ข้าว', 90, 600, 'spicy seafood'],
-    ['เต้าหู้ทรงเครื่องราดข้าว', 55, 430, 'vegAdj egg'],
-    ['ข้าวผัดต้มยำทะเล', 100, 600, 'spicy seafood egg']
-  ]),
-  chinese: mk('chinese', [
-    ['เกี๊ยวน้ำหมู', 60, 380, 'pork'],
-    ['บะหมี่หมูแดง', 60, 480, 'pork egg'],
-    ['ข้าวหน้าเป็ด', 90, 700, 'duck'],
-    ['ติ่มซำชุดเล็ก', 120, 450, 'pork seafood'],
-    ['เกาเหลาเลือดหมู', 60, 300, 'pork'],
-    ['ข้าวผัดหยางโจว', 80, 620, 'pork seafood egg'],
-    ['ผัดคะน้าหมูกรอบ + ข้าว', 70, 680, 'pork'],
-    ['เป็ดปักกิ่ง', 350, 800, 'duck'],
-    ['เต้าหู้ผัดซอสเสฉวน', 70, 450, 'spicy vegAdj'],
-    ['ข้าวหน้าไก่เหลาเหลา', 70, 600, 'chicken'],
-    ['ก๋วยจั๊บน้ำข้น', 60, 420, 'pork'],
-    ['ซาลาเปาไส้หมู 2 ลูก', 35, 360, 'pork'],
-    ['หม่าโผ่เต้าหู้ + ข้าว', 80, 520, 'spicy pork'],
-    ['ผักบุ้งไฟแดง + ข้าว', 55, 450, 'veg'],
-    ['ปลานึ่งซีอิ๊ว', 280, 380, 'seafood'],
-    ['ไก่ผัดเม็ดมะม่วง + ข้าว', 85, 640, 'chicken'],
-    ['เกี๊ยวซ่าทอด', 50, 280, 'pork'],
-    ['บะหมี่เกี๊ยวกุ้ง', 70, 420, 'seafood pork egg'],
-    ['ข้าวต้มปลา', 60, 350, 'seafood'],
-    ['โจ๊กหมู + ไข่', 40, 300, 'pork egg'],
-    ['เนื้อผัดน้ำมันหอย + ข้าว', 95, 620, 'beef'],
-    ['ซุปไก่ตุ๋นยาจีน', 140, 300, 'chicken'],
-    ['ผัดหมี่ฮ่องกง', 70, 590, 'pork vegAdj'],
-    ['ข้าวผัดผักรวมสไตล์จีน', 60, 480, 'veg egg']
-  ]),
-  japanese: mk('japanese', [
-    ['คัตสึด้ง (ข้าวหน้าหมูทอดไข่)', 120, 780, 'pork egg'],
-    ['ราเมนโชยุ', 150, 580, 'pork egg'],
-    ['ซูชิชุดเล็ก', 180, 420, 'seafood'],
-    ['ข้าวแกงกะหรี่ญี่ปุ่นหมูทอด', 110, 820, 'pork'],
-    ['กิวด้ง (ข้าวหน้าเนื้อ)', 100, 720, 'beef'],
-    ['ข้าวหน้าไก่เทริยากิ', 90, 640, 'chicken'],
-    ['ยากิอุด้งหมู', 90, 560, 'pork vegAdj'],
-    ['ซาลมอนดอน', 220, 640, 'seafood'],
-    ['โซบะเย็น + เทมปุระกุ้ง', 100, 450, 'seafood'],
-    ['ข้าวปั้นโอนิกิริ 3 ชิ้น', 55, 300, 'seafood'],
-    ['ทงคัตสึเซ็ต', 150, 850, 'pork egg'],
-    ['ทาโกะยากิ', 60, 330, 'seafood egg'],
-    ['โอโคโนมิยากิ', 90, 550, 'pork seafood egg'],
-    ['โอยาโกะด้ง (ข้าวหน้าไก่ไข่)', 85, 600, 'chicken egg'],
-    ['ยากิโซบะ', 80, 520, 'pork vegAdj'],
-    ['ซาบะย่าง + ซุปมิโสะ', 130, 480, 'seafood'],
-    ['เทมปุระผักรวม', 80, 380, 'veg egg'],
-    ['สุกี้ยากี้หม้อเดี่ยว', 250, 520, 'beef egg'],
-    ['อูนาด้ง (ข้าวหน้าปลาไหล)', 380, 800, 'seafood'],
-    ['ซาชิมิชุดเล็ก', 300, 280, 'seafood'],
-    ['เบนโตะไก่ย่าง', 160, 680, 'chicken'],
-    ['ออมุไรซ์ไก่', 80, 600, 'chicken egg'],
-    ['สลัดสาหร่ายวากาเมะ + เต้าหู้เย็น', 70, 200, 'veg'],
-    ['อินาริซูชิ 4 ชิ้น', 50, 320, 'veg']
-  ]),
-  european: mk('european', [
-    ['สปาเก็ตตี้คาโบนาร่า', 150, 720, 'pork egg'],
-    ['สปาเก็ตตี้ซอสมะเขือเทศ', 110, 520, 'veg'],
-    ['พิซซ่ามาร์การิต้า', 180, 700, 'veg'],
-    ['สเต๊กไก่', 120, 480, 'chicken'],
-    ['สเต๊กหมู', 130, 560, 'pork'],
-    ['สเต๊กเนื้อ', 250, 600, 'beef'],
-    ['ฟิชแอนด์ชิปส์', 160, 780, 'seafood egg'],
-    ['แฮมเบอร์เกอร์เนื้อ', 130, 700, 'beef egg'],
-    ['คลับแซนด์วิช', 90, 520, 'pork egg'],
-    ['สลัดไก่ย่าง', 100, 320, 'chicken'],
-    ['ซุปครีมเห็ด + ขนมปัง', 80, 260, 'veg'],
-    ['ลาซานญ่า', 160, 650, 'beef'],
-    ['ไส้กรอกเยอรมัน + มันบด', 140, 720, 'pork'],
-    ['ข้าวอบชีสไก่', 120, 640, 'chicken'],
-    ['แซลมอนย่างเนย', 290, 520, 'seafood'],
-    ['ปาเอญ่าทะเล', 250, 600, 'seafood'],
-    ['รีซอตโต้เห็ด', 150, 580, 'veg'],
-    ['ซีซาร์สลัดเบคอน', 95, 380, 'pork egg'],
-    ['ออมเล็ตชีสเห็ด + ขนมปัง', 80, 450, 'veg egg'],
-    ['ฮอตดอกชีส', 60, 400, 'pork'],
-    ['ซุปมะเขือเทศ + ขนมปังกระเทียม', 70, 300, 'veg'],
-    ['พาสต้าครีมซอสกุ้ง', 190, 700, 'seafood'],
-    ['เฟรนช์โทสต์ + ผลไม้', 75, 420, 'veg egg'],
-    ['เนื้อบดอบชีส (Shepherd’s Pie)', 140, 600, 'beef']
-  ]),
-  isan: mk('isan', [
-    ['ส้มตำไทย + ไก่ย่าง + ข้าวเหนียว', 90, 620, 'spicy chicken'],
-    ['ลาบหมู + ข้าวเหนียว', 80, 450, 'spicy pork'],
-    ['น้ำตกหมู + ข้าวเหนียว', 85, 420, 'spicy pork'],
-    ['ต้มแซ่บกระดูกอ่อน', 100, 400, 'spicy pork'],
-    ['ไก่ย่างอีสาน + ข้าวเหนียว', 80, 550, 'chicken'],
-    ['คอหมูย่าง + ข้าวเหนียว', 90, 650, 'pork'],
-    ['ลาบเนื้อ + ข้าวเหนียว', 90, 400, 'spicy beef'],
-    ['ตำซั่วใส่ปูปลาร้า', 70, 300, 'spicy seafood'],
-    ['แจ่วฮ้อน', 150, 480, 'spicy pork'],
-    ['ต้มเล้งเนื้อ', 120, 400, 'spicy beef'],
-    ['ปลาเผา + น้ำจิ้มแจ่ว (แยก)', 160, 400, 'seafood'],
-    ['ตำข้าวโพดไข่เค็ม', 60, 250, 'spicy egg'],
-    ['ไส้กรอกอีสาน + ข้าวเหนียว', 40, 320, 'pork'],
-    ['ยำวุ้นเส้นรวมมิตร', 70, 300, 'spicy pork seafood'],
-    ['หมูแดดเดียว + ข้าวเหนียว', 80, 520, 'pork'],
-    ['ตำถาดทะเล', 250, 550, 'spicy seafood'],
-    ['ข้าวคั่วลาบเห็ด', 65, 280, 'spicy veg'],
-    ['ซี่โครงหมูย่าง + ข้าวเหนียว', 110, 600, 'pork'],
-    ['ปีกไก่ทอด + ข้าวเหนียว', 70, 580, 'chicken'],
-    ['หมูสามชั้นย่าง + ข้าวเหนียว', 90, 640, 'pork'],
-    ['ข้าวเหนียวหมูปิ้ง 3 ไม้', 45, 430, 'pork'],
-    ['ซุปหน่อไม้ + ข้าวเหนียว', 50, 150, 'spicy vegAdj'],
-    ['ตำปูปลาร้า', 60, 120, 'spicy seafood'],
-    ['ไก่ทอดหาดใหญ่สไตล์อีสาน + ข้าวเหนียว', 75, 600, 'chicken']
-  ])
-};
-const ALL_ITEMS = Object.values(DB).flat();
+const shuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const fmtBudget = b => b === Infinity ? 'ไม่จำกัดงบ' : `≤ ${b} ฿`;
 
-/* =========================================================
-   Helpers
-   ========================================================= */
-const $ = (s, r = document) => r.querySelector(s);
-const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const mod = (a, n) => ((a % n) + n) % n;
-const esc = s => String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+/* ----- Diet parsing ----- */
+function parseDiet(text) {
+  const t = (text || '').toLowerCase();
+  const res = { noSpicy: false, veg: false, noBeef: false, noPork: false, noChicken: false, noSeafood: false, labels: [] };
+  const re = /(?:งด|ไม่ทาน|ไม่กิน|ไม่เอา|ไม่ใส่|ไม่|แพ้|หลีกเลี่ยง|เลี่ยง|no|without)\s*(?:ทาน|กิน)?\s*(เนื้อสัตว์|เนื้อวัว|เนื้อ|วัว|หมู|ไก่|อาหารทะเล|ทะเล|กุ้ง|ปลา|หอย|ปู|หมึก|เผ็ด)/gi;
+  let m;
+  while ((m = re.exec(t)) !== null) {
+    const w = m[1];
+    if (w === 'เผ็ด') res.noSpicy = true;
+    else if (w === 'เนื้อสัตว์') res.veg = true;
+    else if (w === 'เนื้อวัว' || w === 'เนื้อ' || w === 'วัว') res.noBeef = true;
+    else if (w === 'หมู') res.noPork = true;
+    else if (w === 'ไก่') res.noChicken = true;
+    else res.noSeafood = true;
+  }
+  if (/เจ(?!ีย)|มังสวิรัติ|vegan|vegetarian/i.test(t)) res.veg = true;
+  if (res.veg) res.labels.push('ทานเจ/มังสวิรัติ');
+  if (res.noSpicy) res.labels.push('ไม่เผ็ด');
+  if (!res.veg) {
+    if (res.noBeef) res.labels.push('งดเนื้อวัว');
+    if (res.noPork) res.labels.push('งดหมู');
+    if (res.noChicken) res.labels.push('งดไก่');
+    if (res.noSeafood) res.labels.push('งดอาหารทะเล');
+  }
+  return res;
+}
+function passDiet(item, d) {
+  if (d.noSpicy && item.tags.includes('s')) return false;
+  if (d.veg) return item.tags.includes('v');
+  if (d.noBeef && item.tags.includes('b')) return false;
+  if (d.noPork && item.tags.includes('p')) return false;
+  if (d.noChicken && item.tags.includes('c')) return false;
+  if (d.noSeafood && item.tags.includes('f')) return false;
+  return true;
+}
 
-let toastTimer;
-function toast(msg) {
-  const t = $('#toast'); t.textContent = msg; t.classList.remove('hidden');
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.add('hidden'), 3800);
+/* ----- Menu selection logic: 8 menus ----- */
+function pickMenus() {
+  const d = parseDiet(state.diet);
+  const pool = DB[state.cat].filter(i => passDiet(i, d));
+  let notice = '';
+  if (pool.length === 0) return { menus: [], notice: 'ไม่พบเมนูที่ตรงกับเงื่อนไข ลองปรับข้อจำกัดดูนะ' };
+
+  const within = pool.filter(i => i.price <= state.budget);
+  let chosen;
+  if (within.length >= 8) {
+    chosen = shuffle(within).slice(0, 8);
+  } else {
+    const rest = pool.filter(i => i.price > state.budget).sort((a, b) => a.price - b.price);
+    chosen = within.concat(rest.slice(0, Math.max(0, 8 - within.length)));
+    if (within.length === 0) notice = `ไม่มีเมนูในงบ ${state.budget} ฿ จึงเลือกเมนูที่ราคาใกล้เคียงที่สุดให้แทน`;
+    else notice = `มีเมนูในงบ ${state.budget} ฿ เพียง ${within.length} เมนู จึงเติมเมนูราคาใกล้เคียงให้ครบ`;
+    chosen = shuffle(chosen);
+  }
+  if (chosen.length < 8) notice += (notice ? ' · ' : '') + `เมนูที่ตรงเงื่อนไขมีเพียง ${chosen.length} เมนู`;
+  return { menus: chosen, notice };
 }
 
 /* =========================================================
-   State
+   3) VIEWS & STEPPER
    ========================================================= */
-const state = {
-  cat: null, budget: 100, restrText: '',
-  items: [], source: 'offline',
-  theta: 0, spinning: false, winner: -1, raf: 0
-};
-
-/* =========================================================
-   Step navigation
-   ========================================================= */
-function showStep(n) {
-  $$('.step').forEach((el, i) => el.classList.toggle('active', i === n - 1));
-  $$('.dot').forEach((d, i) => {
-    d.classList.toggle('active', i === n - 1);
-    d.classList.toggle('done', i < n - 1);
-  });
+const VIEWS = ['category', 'filters', 'loading', 'wheel'];
+function show(name) {
+  VIEWS.forEach(v => $('view-' + v).classList.toggle('hidden', v !== name));
+  const el = $('view-' + name); el.classList.remove('fade-in'); void el.offsetWidth; el.classList.add('fade-in');
+  const step = { category: 1, filters: 2, loading: 3, wheel: 3 }[name];
+  renderStepper(step);
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  if (n === 4) requestAnimationFrame(sizeWheel);
 }
-
-function cancelSpin() {
-  cancelAnimationFrame(state.raf);
-  state.spinning = false;
-  pointerAngle = 0; updatePointer();
-  setSpinButtons();
-}
-
-/* =========================================================
-   Step 1 – Categories
-   ========================================================= */
-function buildCategories() {
-  const grid = $('#catGrid');
-  grid.innerHTML = Object.entries(CATEGORIES).map(([k, c]) => `
-    <button class="cat-card glass rounded-2xl p-4 text-center ${k === 'all' ? 'col-span-2 sm:col-span-1' : ''}" data-cat="${k}">
-      <div class="text-4xl sm:text-5xl mb-1">${c.icon}</div>
-      <div class="font-semibold">${c.name}</div>
-      <div class="text-xs text-orange-900/60 mt-0.5">${c.desc}</div>
-    </button>`).join('');
-  $$('.cat-card', grid).forEach(btn => btn.addEventListener('click', () => {
-    $$('.cat-card', grid).forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    state.cat = btn.dataset.cat;
-    ensureAudio(); tickSound();
-    const c = CATEGORIES[state.cat];
-    $('#selCatBadge').textContent = `${c.icon} ${c.name}`;
-    setTimeout(() => showStep(2), 180);
-  }));
-}
-
-/* =========================================================
-   Step 2 – Filters
-   ========================================================= */
-function buildFilters() {
-  const bc = $('#budgetChips');
-  [[50, '50'], [100, '100'], [200, '200'], [300, '300+']].forEach(([v, l]) => {
-    const b = document.createElement('button');
-    b.type = 'button'; b.className = 'chip px-4 py-1.5 rounded-full border border-orange-300 bg-white/80 text-sm font-medium';
-    b.textContent = l + ' บาท'; b.dataset.v = v;
-    b.addEventListener('click', () => { $('#budget').value = v; syncBudgetChips(); });
-    bc.appendChild(b);
-  });
-  $('#budget').addEventListener('input', syncBudgetChips);
-
-  const rc = $('#restrChips');
-  ['ไม่เผ็ด', 'ทานเจ', 'งดเนื้อวัว', 'งดหมู', 'งดอาหารทะเล', 'งดไก่', 'งดไข่'].forEach(t => {
-    const b = document.createElement('button');
-    b.type = 'button'; b.className = 'chip px-3 py-1.5 rounded-full border border-orange-300 bg-white/80 text-sm';
-    b.textContent = t;
-    b.addEventListener('click', () => toggleRestr(t));
-    rc.appendChild(b);
-  });
-  $('#restr').addEventListener('input', syncRestrChips);
-
-  // Gemini key
-  try {
-    const k = localStorage.getItem('foodwheel_gemini_key') || '';
-    $('#apiKey').value = k;
-    $('#useAI').checked = !!k && localStorage.getItem('foodwheel_use_ai') !== '0';
-  } catch (e) {}
-  $('#apiKey').addEventListener('input', () => {
-    const k = $('#apiKey').value.trim();
-    try { localStorage.setItem('foodwheel_gemini_key', k); } catch (e) {}
-    if (k && !$('#useAI').checked) $('#useAI').checked = true;
-    if (!k) $('#useAI').checked = false;
-    saveUseAI();
-  });
-  $('#useAI').addEventListener('change', saveUseAI);
-  $('#budget').value = 100; syncBudgetChips();
-}
-function saveUseAI() { try { localStorage.setItem('foodwheel_use_ai', $('#useAI').checked ? '1' : '0'); } catch (e) {} }
-
-function syncBudgetChips() {
-  const v = parseInt($('#budget').value, 10);
-  $$('#budgetChips .chip').forEach(c => c.classList.toggle('on', parseInt(c.dataset.v, 10) === v));
-}
-function toggleRestr(t) {
-  const inp = $('#restr');
-  const parts = inp.value.split(/[,，]/).map(s => s.trim()).filter(Boolean);
-  const i = parts.indexOf(t);
-  if (i >= 0) parts.splice(i, 1); else parts.push(t);
-  inp.value = parts.join(', ');
-  syncRestrChips();
-}
-function syncRestrChips() {
-  const parts = $('#restr').value.split(/[,，]/).map(s => s.trim());
-  $$('#restrChips .chip').forEach(c => c.classList.toggle('on', parts.includes(c.textContent)));
-}
-
-/* =========================================================
-   Restriction parsing + Offline generation
-   ========================================================= */
-const NEG = '(?:งด|ไม่(?:กิน|ทาน|เอา|ใส่|ชอบ|กินเผ็ด)?|แพ้|เลี่ยง|หลีกเลี่ยง|no\\s+)\\s*';
-const BAN_RULES = [
-  ['beef',    new RegExp(NEG + '(?:เนื้อวัว|วัว|เนื้อ)', 'i')],
-  ['pork',    new RegExp(NEG + '(?:เนื้อหมู|หมู)', 'i')],
-  ['chicken', new RegExp(NEG + '(?:เนื้อไก่|ไก่)', 'i')],
-  ['duck',    new RegExp(NEG + '(?:เป็ด)', 'i')],
-  ['egg',     new RegExp(NEG + '(?:ไข่)', 'i')],
-  ['seafood', new RegExp(NEG + '(?:อาหารทะเล|ซีฟู้ด|seafood|กุ้ง|ปู|ปลา|หอย|ทะเล)', 'i')]
-];
-function parseRestrictions(text) {
-  const t = (text || '').trim();
-  const r = { noSpicy: false, veg: false, ban: new Set() };
-  if (!t) return r;
-  r.noSpicy = new RegExp(NEG + '(?:เผ็ด|spicy)', 'i').test(t);
-  r.veg = /ทานเจ|กินเจ|อาหารเจ|มังสวิรัติ|vegan|vegetarian|(?:^|[\s,，])เจ(?![ก-๙])/i.test(t);
-  BAN_RULES.forEach(([tag, re]) => { if (re.test(t)) r.ban.add(tag); });
-  return r;
-}
-function passes(it, r) {
-  if (r.noSpicy && it.t.includes('spicy')) return false;
-  if (r.veg && !(it.t.includes('veg') || it.t.includes('vegAdj'))) return false;
-  for (const b of r.ban) if (it.t.includes(b)) return false;
-  return true;
-}
-function toMenu(it, r) {
-  const name = (r.veg && !it.t.includes('veg')) ? it.n + ' (ขอแบบเจ)' : it.n;
-  return { name, price: it.p, cal: it.c, tags: it.t, cat: it.k };
-}
-
-function generateOffline(catKey, budget, restrText) {
-  const r = parseRestrictions(restrText);
-  const limit = budget >= 300 ? Infinity : budget;
-  const pool = catKey === 'all' ? ALL_ITEMS : DB[catKey];
-  const picked = [];
-  const used = new Set();
-  const add = it => { if (!used.has(it)) { used.add(it); picked.push(it); } };
-  const notes = [];
-
-  // 1) ตรงทั้งหมวด + งบ + เงื่อนไข
-  const ok = pool.filter(i => passes(i, r));
-  shuffle(ok.filter(i => i.p <= limit)).forEach(i => picked.length < WHEEL_SIZE && add(i));
-
-  // 2) ผ่อนงบ (เลือกที่ใกล้งบที่สุด)
-  if (picked.length < WHEEL_SIZE) {
-    ok.filter(i => !used.has(i)).sort((a, b) => a.p - b.p).forEach(i => picked.length < WHEEL_SIZE && add(i));
-    notes.push('เมนูบางรายการราคาเกินงบเล็กน้อย');
-  }
-  // 3) ขยายไปหมวดอื่นที่ผ่านเงื่อนไข
-  if (picked.length < WHEEL_SIZE) {
-    const others = ALL_ITEMS.filter(i => !used.has(i) && passes(i, r));
-    const within = shuffle(others.filter(i => i.p <= limit));
-    within.concat(others.filter(i => i.p > limit).sort((a, b) => a.p - b.p)).forEach(i => picked.length < WHEEL_SIZE && add(i));
-    notes.push('เติมเมนูจากหมวดอื่นให้ครบ 8 ช่อง');
-  }
-  // 4) สุดท้าย ผ่อนข้อจำกัด
-  if (picked.length < WHEEL_SIZE) {
-    shuffle(ALL_ITEMS.filter(i => !used.has(i))).forEach(i => picked.length < WHEEL_SIZE && add(i));
-    notes.push('ข้อจำกัดเข้มมาก จึงมีบางเมนูที่อาจไม่ตรงเงื่อนไข โปรดตรวจสอบก่อนสั่ง');
-  }
-  return { items: shuffle(picked).map(i => toMenu(i, r)), notes };
-}
-
-/* =========================================================
-   Gemini (optional)
-   ========================================================= */
-async function generateGemini(catKey, budget, restrText, key) {
-  const cat = CATEGORIES[catKey].name;
-  const budgetTxt = budget >= 300 ? 'ไม่จำกัดงบ (300 บาทขึ้นไป)' : `ไม่เกิน ${budget} บาทต่อมื้อ`;
-  const prompt = `คุณเป็นนักโภชนาการและผู้เชี่ยวชาญอาหารในประเทศไทย
-ช่วยแนะนำเมนูอาหาร "${cat}" จำนวน ${WHEEL_SIZE} เมนูพอดี (ห้ามซ้ำกัน หลากหลายรสชาติ)
-งบประมาณ: ${budgetTxt}
-ข้อจำกัดเพิ่มเติม: ${restrText ? restrText : 'ไม่มี'}
-ราคาให้เป็นราคาโดยประมาณของร้านทั่วไปในประเทศไทย (บาท) และแคลอรีโดยประมาณต่อ 1 จาน/ชาม
-ตอบกลับเป็น JSON array เท่านั้น ไม่มีข้อความอื่น รูปแบบ:
-[{"name":"ชื่อเมนูภาษาไทย","price":ตัวเลข,"calories":ตัวเลข,"why":"เหตุผลน่าทาน 1-2 ประโยคภาษาไทย"}]`;
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(key)}`;
-  const ctrl = new AbortController();
-  const to = setTimeout(() => ctrl.abort(), 25000);
-  try {
-    const res = await fetch(url, {
-      method: 'POST', signal: ctrl.signal,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 1, responseMimeType: 'application/json' }
-      })
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    let txt = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    txt = txt.replace(/```json|```/g, '').trim();
-    const arr = JSON.parse(txt);
-    if (!Array.isArray(arr)) throw new Error('bad format');
-    const items = arr.filter(o => o && o.name).slice(0, WHEEL_SIZE).map(o => ({
-      name: String(o.name), price: Math.round(Number(o.price) || 0), cal: Math.round(Number(o.calories ?? o.cal) || 0),
-      why: o.why ? String(o.why) : '', tags: [], cat: catKey
-    }));
-    if (items.length < WHEEL_SIZE) throw new Error('not enough items');
-    return items;
-  } finally { clearTimeout(to); }
-}
-
-/* =========================================================
-   Step 3 – generate pipeline
-   ========================================================= */
-async function generateMenus() {
-  const budget = parseInt($('#budget').value, 10);
-  if (!budget || budget < 1) { toast('กรุณากรอกงบประมาณก่อนนะ'); $('#budget').focus(); return false; }
-  state.budget = budget;
-  state.restrText = $('#restr').value.trim();
-
-  cancelSpin();
-  showStep(3);
-  const msgs = ['กำลังเปิดตู้เย็น…', 'เลือกเมนูให้ตรงงบ…', 'คัดกรองตามข้อจำกัด…', 'จัดวงล้อให้พร้อมหมุน…'];
-  let mi = 0; $('#loadMsg').textContent = msgs[0];
-  const iv = setInterval(() => { mi = (mi + 1) % msgs.length; $('#loadMsg').textContent = msgs[mi]; }, 650);
-  const t0 = performance.now();
-
-  let items = null, source = 'offline', notes = [];
-  const key = $('#apiKey').value.trim();
-  if ($('#useAI').checked && key) {
-    try {
-      $('#loadMsg').textContent = '✨ ให้ Gemini AI คิดเมนูให้…';
-      items = await generateGemini(state.cat, budget, state.restrText, key);
-      source = 'gemini';
-    } catch (e) {
-      console.warn('Gemini failed:', e);
-      toast('เรียก Gemini ไม่สำเร็จ ใช้ฐานข้อมูลออฟไลน์แทน');
-    }
-  }
-  if (!items) {
-    const out = generateOffline(state.cat, budget, state.restrText);
-    items = out.items; notes = out.notes;
-  }
-  const wait = 1100 - (performance.now() - t0);
-  if (wait > 0) await sleep(wait);
-  clearInterval(iv);
-
-  state.items = items; state.source = source; state.winner = -1;
-  state.theta = Math.random() * Math.PI * 2;
-  renderWheelStep(notes);
-  showStep(4);
-  if (notes.length) setTimeout(() => toast(notes[0]), 600);
-  return true;
-}
-
-function renderWheelStep(notes = []) {
-  const c = CATEGORIES[state.cat];
-  const b = state.budget >= 300 ? 'ไม่จำกัดงบ (300+)' : `งบ ${state.budget} บาท`;
-  $('#summaryLine').textContent = `${c.icon} ${c.name} · ${b}${state.restrText ? ' · ' + state.restrText : ''}`;
-  $('#sourceBadge').textContent = state.source === 'gemini' ? '✨ สร้างโดย Gemini AI' : '📦 ฐานข้อมูลออฟไลน์';
-  $('#menuList').innerHTML = state.items.map((it, i) => {
-    const col = SLICE_COLORS[i % SLICE_COLORS.length].bg;
-    return `<li class="flex items-center gap-2.5 rounded-xl bg-white/75 border border-orange-100 px-3 py-2">
-      <span class="w-3.5 h-3.5 rounded-full shrink-0" style="background:${col}"></span>
-      <span class="flex-1 text-sm leading-snug">${esc(it.name)}</span>
-      <span class="text-xs text-orange-900/70 whitespace-nowrap">฿${it.price} · ${it.cal} kcal</span></li>`;
+function renderStepper(active) {
+  const steps = ['เลือกหมวดหมู่', 'ตั้งเงื่อนไข', 'หมุนวงล้อ'];
+  $('stepper').innerHTML = steps.map((s, i) => {
+    const n = i + 1, on = n === active, done = n < active;
+    return `<div class="flex items-center gap-2">
+      <span class="w-7 h-7 grid place-items-center rounded-full font-bold ${on ? 'bg-gradient-to-br from-orange-500 to-red-500 text-white shadow' : done ? 'bg-orange-200 text-orange-700' : 'bg-white/70 text-stone-400'}">${done ? '✓' : n}</span>
+      <span class="${on ? 'font-semibold text-orange-700' : 'text-stone-500'} hidden sm:inline">${s}</span>
+    </div>${n < 3 ? '<span class="w-6 sm:w-10 h-0.5 bg-orange-200 rounded"></span>' : ''}`;
   }).join('');
 }
+function stopSpin() { cancelAnimationFrame(raf); spinning = false; omega = 0; setSpinDisabled(false); }
+
+/* ----- Step 1 ----- */
+function renderCats() {
+  $('cat-grid').innerHTML = CATS.map(c => `
+    <button data-cat="${c.id}" class="cat-card glass rounded-3xl p-4 sm:p-6 text-left flex flex-col gap-3 ${c.id === 'all' ? 'col-span-2 lg:col-span-1' : ''}">
+      <span class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br ${c.grad} grid place-items-center text-3xl sm:text-4xl shadow-lg">${c.icon}</span>
+      <span>
+        <span class="block font-bold text-lg sm:text-xl">${c.name}</span>
+        <span class="block text-xs sm:text-sm text-stone-500 mt-0.5">${c.sub}</span>
+        <span class="block text-xs text-orange-600 mt-1 font-medium">${DB[c.id].length} เมนูในคลัง</span>
+      </span>
+    </button>`).join('');
+  $('cat-grid').querySelectorAll('button').forEach(b => b.addEventListener('click', () => selectCat(b.dataset.cat)));
+}
+function selectCat(id) {
+  state.cat = id; const c = CATS.find(x => x.id === id);
+  $('f-icon').textContent = c.icon; $('f-name').textContent = c.name;
+  $('f-error').classList.add('hidden');
+  show('filters');
+}
+
+/* ----- Step 2 ----- */
+const BUDGETS = [{ l: '50', v: 50 }, { l: '100', v: 100 }, { l: '200', v: 200 }, { l: '300+', v: Infinity }];
+function renderBudgetChips() {
+  $('budget-chips').innerHTML = BUDGETS.map(b => `<button type="button" data-v="${b.v}" class="chip px-4 py-2 rounded-full border border-orange-200 bg-white/80 font-medium ${state.budget === b.v ? 'active' : ''}">${b.l} ฿</button>`).join('');
+  $('budget-chips').querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
+    state.budget = btn.dataset.v === 'Infinity' ? Infinity : Number(btn.dataset.v);
+    $('budget-input').value = '';
+    renderBudgetChips();
+  }));
+}
+const QUICK_DIET = ['ไม่เผ็ด', 'ทานเจ', 'งดเนื้อวัว', 'งดหมู', 'งดอาหารทะเล'];
+function renderQuickDiet() {
+  $('diet-quick').innerHTML = QUICK_DIET.map(q => `<button type="button" class="chip px-3 py-1.5 text-sm rounded-full border border-orange-200 bg-white/80">${q}</button>`).join('');
+  $('diet-quick').querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
+    const inp = $('diet-input'); const w = btn.textContent;
+    if (!inp.value.includes(w)) inp.value = (inp.value.trim() ? inp.value.trim() + ', ' : '') + w;
+    updateDetect();
+  }));
+}
+function updateDetect() {
+  const d = parseDiet($('diet-input').value);
+  $('diet-detect').textContent = d.labels.length ? '✅ ระบบเข้าใจเงื่อนไข: ' + d.labels.join(' · ') : ($('diet-input').value.trim() ? 'ℹ️ ยังไม่พบคำสั่งที่รู้จัก ลองใช้ เช่น "ไม่เผ็ด", "ทานเจ", "งดหมู"' : '');
+}
+$('budget-input').addEventListener('input', e => {
+  const v = e.target.value;
+  if (v === '') { state.budget = 100; } else { state.budget = Math.max(0, Number(v)); }
+  renderBudgetChips();
+  if (v !== '') $('budget-chips').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+});
+$('diet-input').addEventListener('input', updateDetect);
+$('btn-back-cat').addEventListener('click', () => show('category'));
+
+/* ----- Step 3: generate ----- */
+function generate() {
+  state.diet = $('diet-input').value.trim();
+  const { menus, notice } = pickMenus();
+  if (!menus.length) {
+    const e = $('f-error'); e.textContent = notice; e.classList.remove('hidden'); return false;
+  }
+  state.menus = menus; state.notice = notice; return true;
+}
+$('btn-generate').addEventListener('click', () => {
+  $('f-error').classList.add('hidden');
+  if (!generate()) return;
+  stopSpin();
+  $('loading-sub').textContent = `หมวด ${CATS.find(c => c.id === state.cat).name} · ${fmtBudget(state.budget)}`;
+  show('loading');
+  setTimeout(() => { enterWheel(); }, 900);
+});
 
 /* =========================================================
-   Wheel drawing
+   4) WHEEL
    ========================================================= */
-const canvas = $('#wheelCanvas');
-const ctx = canvas.getContext('2d');
-const STEP = (Math.PI * 2) / WHEEL_SIZE;
-let pointerAngle = 0;
+const canvas = $('wheel'), ctx = canvas.getContext('2d');
 
-function sizeWheel() {
-  const wrap = $('#wheelWrap');
-  const avail = wrap.parentElement.clientWidth;
-  if (avail <= 0) return;
-  const s = Math.min(avail, 460);
-  wrap.style.width = s + 'px'; wrap.style.height = s + 'px';
-  const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
-  canvas.width = Math.round(s * dpr); canvas.height = Math.round(s * dpr);
-  drawWheel(state.winner);
+function enterWheel() {
+  show('wheel');
+  renderSummary(); renderList();
+  rot = Math.random() * Math.PI * 2; lastIdx = idxAt(rot);
+  layoutWheel();
 }
-window.addEventListener('resize', () => { if ($('#step4').classList.contains('active')) sizeWheel(); });
-
-function fitText(g, text, maxW, size, minSize) {
-  let s = size;
-  g.font = `600 ${s}px Kanit, sans-serif`;
-  while (g.measureText(text).width > maxW && s > minSize) { s -= 1; g.font = `600 ${s}px Kanit, sans-serif`; }
-  return s;
+function renderSummary() {
+  const c = CATS.find(x => x.id === state.cat);
+  const d = parseDiet(state.diet);
+  const chips = [`${c.icon} ${c.name}`, `💰 ${fmtBudget(state.budget)}`].concat(d.labels.map(l => '🥗 ' + l));
+  $('summary').innerHTML = chips.map(t => `<span class="px-3 py-1 rounded-full bg-white/80 border border-orange-200 font-medium">${t}</span>`).join('');
+}
+function renderList() {
+  $('menu-list').innerHTML = state.menus.map((m, i) => `
+    <li class="list-item flex items-center gap-3 rounded-2xl border border-orange-100 bg-white/70 px-3 py-2.5" data-i="${i}">
+      <span class="w-3 h-8 rounded-full shrink-0" style="background:${PALETTE[i % PALETTE.length].bg}"></span>
+      <span class="min-w-0 flex-1">
+        <span class="block font-semibold text-sm truncate">${m.name}</span>
+        <span class="block text-xs text-stone-500">~${m.price} ฿ · ~${m.cal} kcal${m.tags.includes('v') && parseDiet(state.diet).veg ? ' · เจได้' : ''}</span>
+      </span>
+    </li>`).join('');
+  const n = $('notice');
+  if (state.notice) { n.textContent = '⚠️ ' + state.notice; n.classList.remove('hidden'); } else n.classList.add('hidden');
+}
+function highlightWinner(i) {
+  document.querySelectorAll('#menu-list .list-item').forEach(li => li.classList.toggle('winner', Number(li.dataset.i) === i));
 }
 
-function drawWheel(highlight = -1) {
-  const W = canvas.width; if (!W || !state.items.length) return;
-  const c = W / 2, R = c * 0.925;
-  ctx.clearRect(0, 0, W, W);
-  ctx.save(); ctx.translate(c, c);
-
-  // outer rim
-  const rim = ctx.createRadialGradient(0, 0, R, 0, 0, c);
-  rim.addColorStop(0, '#fbbf24'); rim.addColorStop(.5, '#b45309'); rim.addColorStop(1, '#78350f');
-  ctx.beginPath(); ctx.arc(0, 0, c * 0.985, 0, Math.PI * 2);
-  ctx.fillStyle = rim; ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = W * 0.03; ctx.shadowOffsetY = W * 0.012; ctx.fill();
-  ctx.shadowColor = 'transparent';
-
-  ctx.rotate(state.theta);
-
-  // slices
-  state.items.forEach((it, i) => {
-    const col = SLICE_COLORS[i % SLICE_COLORS.length];
-    const a0 = i * STEP, a1 = a0 + STEP;
-    ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, R, a0, a1); ctx.closePath();
-    const gr = ctx.createRadialGradient(0, 0, R * 0.1, 0, 0, R);
-    gr.addColorStop(0, col.bg); gr.addColorStop(1, col.bg);
-    ctx.fillStyle = gr; ctx.fill();
-    ctx.lineWidth = W * 0.004; ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.stroke();
-
-    if (highlight >= 0 && highlight !== i) { ctx.fillStyle = 'rgba(60,20,0,.38)'; ctx.fill(); }
+function layoutWheel() {
+  const size = canvas.clientWidth; if (!size) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  canvas.width = size * dpr; canvas.height = size * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  // fit labels
+  const R = size / 2 - 12;
+  const maxW = R * 0.66;
+  const base = Math.max(11, Math.min(17, size / 26));
+  labels = state.menus.map(m => {
+    let fs = base, txt = m.name;
+    ctx.font = `600 ${fs}px Prompt, sans-serif`;
+    while (ctx.measureText(txt).width > maxW && fs > 10) { fs -= 0.5; ctx.font = `600 ${fs}px Prompt, sans-serif`; }
+    if (ctx.measureText(txt).width > maxW) {
+      while (txt.length > 3 && ctx.measureText(txt + '…').width > maxW) txt = txt.slice(0, -1);
+      txt += '…';
+    }
+    return { txt, fs };
   });
+  drawWheel();
+}
+function drawWheel() {
+  const size = canvas.clientWidth; if (!size || !state.menus.length) return;
+  const N = state.menus.length, seg = Math.PI * 2 / N, cx = size / 2, cy = size / 2, R = size / 2 - 12;
+  ctx.clearRect(0, 0, size, size);
 
-  // labels
-  state.items.forEach((it, i) => {
-    const col = SLICE_COLORS[i % SLICE_COLORS.length];
+  // outer ring
+  const ring = ctx.createLinearGradient(0, 0, size, size);
+  ring.addColorStop(0, '#fbbf24'); ring.addColorStop(.5, '#dc2626'); ring.addColorStop(1, '#f97316');
+  ctx.beginPath(); ctx.arc(cx, cy, size / 2 - 2, 0, Math.PI * 2); ctx.fillStyle = ring; ctx.fill();
+
+  // segments
+  for (let i = 0; i < N; i++) {
+    const a0 = rot + i * seg, a1 = a0 + seg, col = PALETTE[i % PALETTE.length];
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R, a0, a1); ctx.closePath();
+    ctx.fillStyle = col.bg; ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 2; ctx.stroke();
+
     ctx.save();
-    ctx.rotate(i * STEP + STEP / 2);
+    ctx.translate(cx, cy); ctx.rotate(a0 + seg / 2);
     ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.font = `600 ${labels[i].fs}px Prompt, sans-serif`;
     ctx.fillStyle = col.fg;
-    const maxW = R * 0.64, x = R * 0.9;
-    const base = W * 0.044, min = W * 0.03;
-    let name = it.name;
-    let s = fitText(ctx, name, maxW, base, min);
-    if (ctx.measureText(name).width > maxW) {
-      // two lines (split at space nearest middle) or ellipsis
-      const sp = []; for (let k = 0; k < name.length; k++) if (name[k] === ' ') sp.push(k);
-      if (sp.length) {
-        const mid = name.length / 2;
-        const cut = sp.reduce((a, b) => Math.abs(b - mid) < Math.abs(a - mid) ? b : a);
-        const l1 = name.slice(0, cut).trim(), l2 = name.slice(cut).trim();
-        s = Math.min(fitText(ctx, l1, maxW, base * 0.85, min), fitText(ctx, l2, maxW, base * 0.85, min));
-        ctx.font = `600 ${s}px Kanit, sans-serif`;
-        const lh = s * 1.05;
-        let t1 = l1, t2 = l2;
-        while (ctx.measureText(t1).width > maxW && t1.length > 3) t1 = t1.slice(0, -1);
-        while (ctx.measureText(t2).width > maxW && t2.length > 3) t2 = t2.slice(0, -1);
-        ctx.fillText(t1 === l1 ? t1 : t1 + '…', x, -lh / 2);
-        ctx.fillText(t2 === l2 ? t2 : t2 + '…', x, lh / 2);
-        ctx.restore(); return;
-      }
-      ctx.font = `600 ${s}px Kanit, sans-serif`;
-      while (ctx.measureText(name + '…').width > maxW && name.length > 3) name = name.slice(0, -1);
-      name += '…';
-    }
-    ctx.font = `600 ${s}px Kanit, sans-serif`;
-    ctx.fillText(name, x, 0);
+    ctx.fillText(labels[i].txt, R - 16, 0);
     ctx.restore();
-  });
-
-  // highlight winner outline
-  if (highlight >= 0) {
-    ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, R, highlight * STEP, (highlight + 1) * STEP); ctx.closePath();
-    ctx.lineWidth = W * 0.012; ctx.strokeStyle = '#fef08a'; ctx.shadowColor = '#fde047'; ctx.shadowBlur = W * 0.04; ctx.stroke();
-    ctx.shadowColor = 'transparent';
   }
-
-  // pegs
-  for (let i = 0; i < WHEEL_SIZE; i++) {
-    const a = i * STEP;
-    ctx.beginPath(); ctx.arc(Math.cos(a) * R * 1.0, Math.sin(a) * R * 1.0, W * 0.014, 0, Math.PI * 2);
-    ctx.fillStyle = '#fef3c7'; ctx.strokeStyle = '#92400e'; ctx.lineWidth = W * 0.004; ctx.fill(); ctx.stroke();
+  // rim lights
+  const lights = 24;
+  for (let i = 0; i < lights; i++) {
+    const a = rot * 0.0 + (i / lights) * Math.PI * 2;
+    const x = cx + Math.cos(a) * (size / 2 - 7), y = cy + Math.sin(a) * (size / 2 - 7);
+    ctx.beginPath(); ctx.arc(x, y, 2.6, 0, Math.PI * 2);
+    ctx.fillStyle = i % 2 ? '#fff' : '#fef3c7'; ctx.fill();
   }
-
-  ctx.rotate(-state.theta);
-  // hub ring
-  ctx.beginPath(); ctx.arc(0, 0, c * 0.17, 0, Math.PI * 2);
-  ctx.fillStyle = '#7c2d12'; ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = W * 0.02; ctx.fill();
-  ctx.restore();
+  // hub shadow
+  ctx.beginPath(); ctx.arc(cx, cy, size * 0.125, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.fill();
 }
 
-function updatePointer() {
-  $('#pointer').style.transform = `translateX(-50%) rotate(${pointerAngle}deg)`;
+function idxAt(r) {
+  const N = state.menus.length || 1, seg = Math.PI * 2 / N;
+  const a = (((-Math.PI / 2 - r) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+  return Math.floor(a / seg) % N;
 }
 
-/* =========================================================
-   Spin physics
-   ========================================================= */
-function sliceAt(theta) {
-  return Math.floor(mod(-Math.PI / 2 - theta, Math.PI * 2) / STEP) % WHEEL_SIZE;
+/* ----- sound ----- */
+function tickSound() {
+  if (!soundOn || !actx) return;
+  try {
+    const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime;
+    o.type = 'triangle'; o.frequency.value = 880;
+    g.gain.setValueAtTime(0.07, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+    o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + 0.06);
+  } catch (e) {}
 }
-function setSpinButtons() {
-  const sp = state.spinning;
-  $('#spinBtn').disabled = sp; $('#spinCenter').disabled = sp;
-  $('#spinBtn').textContent = sp ? '🌀 กำลังหมุน…' : '🎲 SPIN (หมุนวงล้อ)';
-  $('#againBtn').disabled = sp;
-  $('#againBtn').classList.toggle('opacity-50', sp);
+function winSound() {
+  if (!soundOn || !actx) return;
+  try {
+    [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+      const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime + i * 0.12;
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.12, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+      o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + 0.4);
+    });
+  } catch (e) {}
+}
+function wiggle() {
+  const p = $('pointer');
+  p.style.transition = 'none'; p.style.transform = 'translateX(-50%) rotate(-18deg)';
+  requestAnimationFrame(() => { p.style.transition = 'transform .12s ease-out'; p.style.transform = 'translateX(-50%) rotate(0deg)'; });
 }
 
+/* ----- spin physics: angular velocity w/ friction ----- */
+function setSpinDisabled(v) { $('btn-spin').disabled = v; $('btn-center').disabled = v; }
 function spin() {
-  if (state.spinning || !state.items.length) return;
-  ensureAudio();
-  closeModal();
-  state.spinning = true; state.winner = -1; setSpinButtons();
-
-  const winner = Math.floor(Math.random() * WHEEL_SIZE);
-  const jitter = (Math.random() - 0.5) * STEP * 0.7;
-  const target = mod(-Math.PI / 2 - (winner + 0.5) * STEP - jitter, Math.PI * 2);
-  const delta = mod(target - mod(state.theta, Math.PI * 2), Math.PI * 2);
-  const total = delta + Math.PI * 2 * (5 + Math.floor(Math.random() * 3));
-  const start = state.theta;
-  const dur = 5600 + Math.random() * 1600;
-  const t0 = performance.now();
-  let lastIdx = sliceAt(start), lastTick = 0;
-
-  const frame = now => {
-    const t = Math.min((now - t0) / dur, 1);
-    const e = 1 - Math.pow(1 - t, 4);                // ease-out quart: เร็วก่อนแล้วค่อยๆ ช้าลง
-    state.theta = start + total * e;
-    drawWheel(-1);
-
-    const idx = sliceAt(state.theta);
-    if (idx !== lastIdx) {
-      lastIdx = idx;
-      if (now - lastTick > 35) { tickSound(); lastTick = now; }
-      pointerAngle = -24;                            // ปลายเข็มถูกหมุดดีดให้สะบัด
-    }
-    pointerAngle *= 0.82;
-    if (Math.abs(pointerAngle) < 0.2) pointerAngle = 0;
-    updatePointer();
-
-    if (t < 1) { state.raf = requestAnimationFrame(frame); }
-    else finishSpin(winner);
-  };
-  state.raf = requestAnimationFrame(frame);
-}
-
-function finishSpin(winner) {
-  state.spinning = false; state.winner = winner;
-  pointerAngle = 0; updatePointer();
-  drawWheel(winner); setSpinButtons();
-  winSound(); confetti();
-  try { navigator.vibrate && navigator.vibrate([60, 40, 120]); } catch (e) {}
-  setTimeout(() => { if (state.winner === winner) showModal(winner); }, 700);
-}
-
-/* =========================================================
-   Winner modal
-   ========================================================= */
-function makeReason(it) {
-  if (it.why) return it.why;
-  const parts = [];
-  if (it.cal <= 350) parts.push('แคลอรีเบา กินแล้วสบายท้อง ไม่หนักตัว');
-  else if (it.cal <= 560) parts.push('แคลอรีกำลังดี อิ่มพอเหมาะ ไม่จุกเกินไป');
-  else parts.push('จัดเต็มอิ่มหนำ เหมาะกับวันที่ต้องใช้พลังงานเยอะ');
-
-  const b = state.budget;
-  if (b >= 300) parts.push('งบไม่จำกัดทั้งทีก็ฉลองมื้อนี้ให้เต็มที่');
-  else if (it.price <= b * 0.7) parts.push('ราคาประหยัดกว่างบที่ตั้งไว้ เหลือเงินไปเติมของหวานต่อได้');
-  else if (it.price <= b) parts.push('ราคาอยู่ในงบพอดี คุ้มค่าสุดๆ');
-  else parts.push('เกินงบเล็กน้อย แต่คุ้มที่จะลองสักครั้ง');
-
-  const tagLines = {
-    spicy: 'รสจัดจ้านถึงใจ ปลุกความสดชื่นได้ทันที',
-    seafood: 'ได้โปรตีนและความสดจากอาหารทะเล',
-    chicken: 'โปรตีนจากไก่ย่อยง่าย อิ่มสบาย',
-    pork: 'เนื้อสัมผัสนุ่มฉ่ำ รสชาติเข้มข้นกำลังดี',
-    beef: 'เนื้อชุ่มฉ่ำ ให้ธาตุเหล็กและโปรตีนสูง',
-    veg: 'อร่อยแบบไม่ต้องพึ่งเนื้อสัตว์ เบาท้อง',
-    duck: 'หนังกรอบ เนื้อหอมมัน เป็นเมนูที่ไม่ได้กินบ่อย'
-  };
-  const hit = (it.tags || []).filter(t => tagLines[t]);
-  if (hit.length) parts.push(tagLines[hit[Math.floor(Math.random() * hit.length)]]);
-  return parts.join(' · ');
-}
-
-function showModal(i) {
-  const it = state.items[i];
-  $('#mName').textContent = it.name;
-  $('#mPrice').textContent = it.price;
-  $('#mCal').textContent = it.cal;
-  $('#mWhy').textContent = makeReason(it);
-  const m = $('#modal'); m.classList.remove('hidden'); m.classList.add('flex');
-}
-function closeModal() { const m = $('#modal'); m.classList.add('hidden'); m.classList.remove('flex'); }
-
-/* =========================================================
-   Sound (WebAudio)
-   ========================================================= */
-let actx = null, muted = false;
-function ensureAudio() {
+  if (spinning || !state.menus.length) return;
   try {
     if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
     if (actx.state === 'suspended') actx.resume();
   } catch (e) {}
+  closeModal(true);
+  highlightWinner(-1);
+  spinning = true; setSpinDisabled(true);
+  omega = 22 + Math.random() * 12;          // rad/s
+  lastT = performance.now(); lastIdx = idxAt(rot);
+  raf = requestAnimationFrame(frame);
 }
-function beep(freq, dur, type = 'square', vol = 0.05, delay = 0) {
-  if (muted || !actx) return;
-  try {
-    const o = actx.createOscillator(), g = actx.createGain();
-    const t = actx.currentTime + delay;
-    o.type = type; o.frequency.setValueAtTime(freq, t);
-    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + 0.02);
-  } catch (e) {}
+function frame(now) {
+  const dt = Math.min((now - lastT) / 1000, 0.05); lastT = now;
+  omega = omega * Math.exp(-0.8 * dt) - 0.3 * dt;   // viscous + dry friction
+  if (omega <= 0.04) { omega = 0; spinning = false; setSpinDisabled(false); drawWheel(); finish(); return; }
+  rot += omega * dt;
+  const i = idxAt(rot);
+  if (i !== lastIdx) { lastIdx = i; tickSound(); wiggle(); }
+  drawWheel();
+  raf = requestAnimationFrame(frame);
 }
-function tickSound() { beep(880 + Math.random() * 120, 0.04, 'square', 0.04); }
-function winSound() { [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) => beep(f, 0.35, 'triangle', 0.09, i * 0.11)); }
-
-/* =========================================================
-   Confetti
-   ========================================================= */
-function confetti() {
-  const cv = $('#confetti'), g = cv.getContext('2d');
-  cv.width = innerWidth; cv.height = innerHeight;
-  const cols = ['#f97316', '#ef4444', '#fbbf24', '#fde68a', '#fb7185', '#ffffff', '#84cc16'];
-  const ps = Array.from({ length: 150 }, () => ({
-    x: innerWidth / 2, y: innerHeight * 0.45,
-    vx: (Math.random() - .5) * 16, vy: -Math.random() * 15 - 4,
-    s: Math.random() * 8 + 5, r: Math.random() * 6, vr: (Math.random() - .5) * .4,
-    c: cols[Math.floor(Math.random() * cols.length)]
-  }));
-  let f = 0;
-  (function step() {
-    g.clearRect(0, 0, cv.width, cv.height);
-    ps.forEach(p => {
-      p.vy += .35; p.x += p.vx; p.y += p.vy; p.vx *= .99; p.r += p.vr;
-      g.save(); g.translate(p.x, p.y); g.rotate(p.r); g.fillStyle = p.c;
-      g.globalAlpha = Math.max(0, 1 - f / 200);
-      g.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * .6); g.restore();
-    });
-    if (++f < 200) requestAnimationFrame(step); else g.clearRect(0, 0, cv.width, cv.height);
-  })();
+function finish() {
+  const i = idxAt(rot), m = state.menus[i];
+  highlightWinner(i);
+  $('m-name').textContent = m.name;
+  $('m-price').textContent = `💰 ~${m.price} บาท`;
+  $('m-cal').textContent = `🔥 ~${m.cal} kcal`;
+  $('m-reason').textContent = '😋 ' + m.reason;
+  openModal(); winSound(); confetti();
 }
 
-/* =========================================================
-   Wire up
-   ========================================================= */
-$('#back1').addEventListener('click', () => showStep(1));
-$('#genBtn').addEventListener('click', generateMenus);
-$('#spinBtn').addEventListener('click', spin);
-$('#spinCenter').addEventListener('click', spin);
-$('#againBtn').addEventListener('click', spin);                       // ลองหมุนใหม่ (วงล้อเดิม)
-$('#regenBtn').addEventListener('click', () => { closeModal(); generateMenus(); }); // สุ่มเมนูชุดใหม่ (เงื่อนไขเดิม)
-$('#editBtn').addEventListener('click', () => { cancelSpin(); closeModal(); showStep(2); });
-$('#catBtn').addEventListener('click', () => { cancelSpin(); closeModal(); showStep(1); });
-$('#mClose').addEventListener('click', closeModal);
-$('#mAgain').addEventListener('click', () => { closeModal(); setTimeout(spin, 150); });
-$('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+/* ----- modal & confetti ----- */
+function openModal() { $('modal').classList.remove('hidden-modal'); }
+function closeModal() { $('modal').classList.add('hidden-modal'); }
+$('m-close').addEventListener('click', closeModal);
+$('modal').addEventListener('click', e => { if (e.target === $('modal')) closeModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-$('#muteBtn').addEventListener('click', () => {
-  muted = !muted; $('#muteBtn').textContent = muted ? '🔇' : '🔊';
-  if (!muted) { ensureAudio(); tickSound(); }
-});
-$('#budget').addEventListener('keydown', e => { if (e.key === 'Enter') generateMenus(); });
-$('#restr').addEventListener('keydown', e => { if (e.key === 'Enter') generateMenus(); });
+function confetti() {
+  const cols = ['#f97316', '#ef4444', '#fbbf24', '#10b981', '#8b5cf6', '#ec4899'];
+  for (let i = 0; i < 60; i++) {
+    const s = document.createElement('span'); s.className = 'confetti';
+    s.style.left = Math.random() * 100 + 'vw';
+    s.style.background = cols[i % cols.length];
+    s.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+    s.style.animationDuration = (2 + Math.random() * 2.2) + 's';
+    s.style.animationDelay = (Math.random() * 0.5) + 's';
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 5200);
+  }
+}
 
-buildCategories();
-buildFilters();
-showStep(1);
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if ($('#step4').classList.contains('active')) drawWheel(state.winner); });
+/* ----- actions ----- */
+function reroll() {
+  if (!generate()) return;
+  stopSpin(); closeModal();
+  renderSummary(); renderList(); highlightWinner(-1);
+  rot = Math.random() * Math.PI * 2; lastIdx = idxAt(rot);
+  layoutWheel();
+}
+$('btn-spin').addEventListener('click', spin);
+$('btn-center').addEventListener('click', spin);
+$('btn-reroll').addEventListener('click', reroll);
+$('m-again').addEventListener('click', () => { closeModal(); setTimeout(spin, 200); });
+$('m-reroll').addEventListener('click', () => { closeModal(); reroll(); });
+$('btn-edit').addEventListener('click', () => { stopSpin(); closeModal(); show('filters'); });
+$('btn-change-cat').addEventListener('click', () => { stopSpin(); closeModal(); show('category'); });
+$('m-cat').addEventListener('click', () => { stopSpin(); closeModal(); show('category'); });
+$('btn-sound').addEventListener('click', e => {
+  soundOn = !soundOn; e.currentTarget.textContent = soundOn ? '🔊 เสียง' : '🔇 ปิดเสียง'; e.currentTarget.setAttribute('aria-pressed', soundOn);
+});
+
+let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (!$('view-wheel').classList.contains('hidden')) layoutWheel(); }, 120); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!$('view-wheel').classList.contains('hidden')) layoutWheel(); });
+
+/* ----- init ----- */
+$('pointer').style.transform = 'translateX(-50%)';
+renderCats(); renderBudgetChips(); renderQuickDiet(); renderStepper(1);
 </script>
 </body>
 </html>
